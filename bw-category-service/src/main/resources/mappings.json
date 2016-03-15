@@ -1,0 +1,123 @@
+{
+  "settings" : {
+    "analysis" : {
+      "analyzer" : {
+        "dmoz-href" : {
+          "type" : "custom",
+          "tokenizer" : "dmozpath_tokenizer",
+          "filter" : [ "standard", "lowercase", "ngram" ]
+        },
+        "dmoz-suggest" : {
+          "type" : "custom",
+          "tokenizer" : "standard",
+          "filter" : [ "standard", "lowercase", "ngram" ]
+        }
+      },
+      "tokenizer" : {
+        "dmozpath_tokenizer" : {
+          "type" : "path_hierarchy",
+          "skip" : "1"
+        }
+      },
+      "filter" : {
+        "ngram" : {
+          "type" : "ngram",
+          "min_gram" : 2,
+          "max_gram" : 18
+        }
+      }
+    }
+  },
+  "mappings" : {
+    "category" : {
+      "_source" : {
+        "enabled" : "true"
+      },
+      "_all" : {
+        "enabled" : "true"
+      },
+      "properties" : {
+        "href" : {
+          "type" : "string",
+          "include_in_all" : "true",
+          "index" : "not_analyzed",
+          "fields" : {
+            "autocathref" : {
+              "type" : "string",
+              "index_analyzer" : "dmoz-href"
+            },
+            "suggest" : {
+              "type" : "completion"
+            }
+          }
+        },
+        "catId" : {
+          "type" : "integer",
+          "include_in_all" : "true",
+          "index" : "not_analyzed"
+        },
+        "namespaceAbbrev" : {
+          "type" : "string",
+          "include_in_all" : "true",
+          "index" : "not_analyzed"
+        },
+        "last" : {
+          "type" : "string",
+          "include_in_all" : "true",
+          "index" : "not_analyzed",
+          "fields" : {
+            "suggestcat" : {
+              "type" : "string",
+              "index_analyzer" : "dmoz-suggest"
+            },
+            "suggest" : {
+              "type" : "completion"
+            }
+          }
+        },
+        "lowerLast" : {
+          "type" : "string",
+          "include_in_all" : "true",
+          "index" : "not_analyzed"
+        },
+        "hrefElements" : {
+          "type" : "string",
+          "include_in_all" : "true",
+          "index" : "not_analyzed"
+        },
+        "hrefDepth" : {
+          "type" : "integer",
+          "include_in_all" : "true",
+          "index" : "not_analyzed"
+        },
+        "lastUpdate" : {
+          "type" : "string",
+          "include_in_all" : "true",
+          "index" : "not_analyzed"
+        },
+        "description" : {
+          "type" : "string",
+          "include_in_all" : "true",
+          "index" : "not_analyzed"
+        },
+        "children" : {
+          "type" : "object",
+          "properties" : {
+            "sort" : {
+              "type" : "integer",
+              "include_in_all" : "true",
+              "index" : "not_analyzed"
+            },
+            "href" : {
+              "type" : "string",
+              "include_in_all" : "true",
+              "index" : "not_analyzed"
+            }
+          },
+          "include_in_all" : "true",
+          "index" : "not_analyzed"
+        }
+      }
+    }
+  }
+}
