@@ -14,8 +14,11 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.LineNumberReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -48,11 +51,40 @@ public abstract class DmozStructureParser extends DefaultHandler {
 
   private Category topic;
   private StringBuilder curChars = new StringBuilder();
+  
+  private Set<String> exclusions;
 
   public DmozStructureParser(final CategoryConfigProperties conf) throws CategoryException {
     try {
       this.conf = conf;
       structureDataPath = Paths.get(this.conf.getDataPath());
+
+      if (this.conf.getExclusions() != null) {
+        Path p = Paths.get(this.conf.getExclusions());
+        final File f = p.toFile();
+
+        LineNumberReader lnr = new LineNumberReader(new FileReader(f));
+        
+        exclusions = new TreeSet<>();
+        
+        while (true) {
+          final String s = lnr.readLine();
+          
+          if (s == null) {
+            break;
+          }
+          
+          if (s.startsWith("#")) {
+            continue;
+          }
+          
+          if (s.trim().length() == 0) {
+            continue;
+          }
+          
+          exclusions.add(s);
+        }
+      }
 
       final SAXParserFactory spf = SAXParserFactory.newInstance();
       spf.setNamespaceAware(true);
@@ -108,10 +140,15 @@ public abstract class DmozStructureParser extends DefaultHandler {
 
         final String href = changeTop(attrVal("id", attributes));
         if (href == null) {
+          skippingTopic = true;
+          skippedTopics++;
           return;
         }
 
-        if (href.startsWith("/dmoz/World/")) {
+        if (excluded(href)) {
+          if (!href.startsWith("/dmoz/World/")) {
+            info("Skipping " + href);
+          }
           skippingTopic = true;
           skippedTopics++;
 
@@ -211,6 +248,20 @@ public abstract class DmozStructureParser extends DefaultHandler {
                          final int start,
                          final int length) throws SAXException {
     curChars.append(ch, start, length);
+  }
+
+  private boolean excluded(final String href) {
+    if (exclusions == null) {
+      return false;
+    }
+
+    for (final String prefix: exclusions) {
+      if (href.startsWith(prefix)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private String changeTop(final String path) {

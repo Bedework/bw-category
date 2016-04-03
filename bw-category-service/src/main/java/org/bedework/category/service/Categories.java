@@ -21,9 +21,10 @@ package org.bedework.category.service;
 import org.bedework.category.common.CategoryException;
 import org.bedework.category.common.CategoryIndex;
 import org.bedework.util.elasticsearch.EsCtlMBean;
+import org.bedework.util.elasticsearch.EsUtil;
 import org.bedework.util.jmx.ConfBase;
 import org.bedework.util.jmx.InfoLines;
-import org.bedework.util.jmx.MBeanUtil;
+import org.bedework.util.misc.Util;
 
 import java.util.List;
 
@@ -40,8 +41,6 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
 
   InfoLines infoLines = new InfoLines();
   
-  private EsCtlMBean esCtl;
-
   /**
    * The thread that runs the feed
    */
@@ -120,13 +119,16 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
       try {
         indexer = new CategoryIndex(getEsCtl(), cats);
 
+        final String targetIndex = indexer.newIndex();
+        info("Indexing to " + targetIndex);
+        
         indexer.parseDmoz(infoLines);
         
         indexer.makeProduction();
         
         return true;
       } catch (final Throwable t) {
-        error("Unable to create new index");
+        error("Unable to reindex");
         error(t);
         setStatus(statusFailed);
         return false;
@@ -150,7 +152,7 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
    * @return object name value for the mbean with this name
    */
   public static String getServiceName(final String name) {
-    return "org.bedework.selfreg:service=" + name;
+    return "org.bedework.categories:service=" + name;
   }
 
   /* ========================================================================
@@ -213,6 +215,16 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
   }
 
   @Override
+  public String getExclusions() {
+    return getConfig().getExclusions();
+  }
+
+  @Override
+  public void setExclusions(final String val) {
+    getConfig().setExclusions(val);
+  }
+
+  @Override
   public String getDataPath() {
     return getConfig().getDataPath();
   }
@@ -264,6 +276,42 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
   }
 
   @Override
+  public String listIndexes() {
+    try {
+      return getEsCtl().listIndexes();
+    } catch (Throwable t) {
+      t.printStackTrace();
+      return t.getLocalizedMessage();
+    }
+  }
+
+  @Override
+  public String purgeIndexes() {
+    try {
+      final List<String> is = new CategoryIndex(getEsCtl(),
+                                                this).purgeIndexes();
+
+      if (Util.isEmpty(is)) {
+        return "No indexes purged";
+      }
+
+      final StringBuilder res = new StringBuilder("Purged indexes");
+
+      res.append("------------------------\n");
+
+      for (final String i: is) {
+        res.append(i);
+        res.append("\n");
+      }
+
+      return res.toString();
+    } catch (Throwable t) {
+      t.printStackTrace();
+      return t.getLocalizedMessage();
+    }
+  }
+
+  @Override
   public String getStatus() {
     if (reindexer == null) {
       return statusStopped;
@@ -303,13 +351,6 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
    * @throws Throwable
    */
   private EsCtlMBean getEsCtl() throws Throwable {
-    if (esCtl != null) {
-      return esCtl;
-    }
-         
-    esCtl = (EsCtlMBean)MBeanUtil.getMBean(EsCtlMBean.class,
-                                           EsCtlMBean.serviceName);
-
-    return esCtl;
+    return EsUtil.getEsCtl();
   }
 }

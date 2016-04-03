@@ -56,6 +56,19 @@ public interface CategoryConfigProperties {
    */
   void setDataPath(String val);
 
+  /** Get the file path for exclusions file
+   *
+   * @return name
+   */
+  @MBeanInfo("file path for exclusions file")
+  String getExclusions();
+
+  /** Set the file path for exclusions file
+   *
+   * @param val the path
+   */
+  void setExclusions(String val);
+
   /** Get the file path for generated data
    *
    * @return name

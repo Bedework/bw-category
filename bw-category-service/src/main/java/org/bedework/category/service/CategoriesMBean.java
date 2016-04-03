@@ -22,7 +22,7 @@ import org.bedework.category.common.CategoryConfigProperties;
 import org.bedework.util.jmx.ConfBaseMBean;
 import org.bedework.util.jmx.MBeanInfo;
 
-/** Run the Bedework selfreg engine service
+/** Run the Bedework category service
  *
  * @author douglm
  */
@@ -44,4 +44,16 @@ public interface CategoriesMBean extends ConfBaseMBean,
    */
   @MBeanInfo("Stop reindexing the data")
   void stopReindex();
+
+  /** List indexes
+   *
+   */
+  @MBeanInfo("list all indexes")
+  String listIndexes();
+
+  /** Purge category indexes
+   *
+   */
+  @MBeanInfo("Purge category indexes")
+  String purgeIndexes();
 }

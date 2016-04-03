@@ -39,6 +39,8 @@ public class CategoryConfigPropertiesImpl<T extends CategoryConfigPropertiesImpl
   private String indexName;
 
   private String structureDataPath;
+  
+  private String exclusions;
 
   private String outDataPath;
 
@@ -64,6 +66,16 @@ public class CategoryConfigPropertiesImpl<T extends CategoryConfigPropertiesImpl
   @Override
   public void setDataPath(final String val) {
     structureDataPath = val;
+  }
+
+  @Override
+  public String getExclusions() {
+    return exclusions;
+  }
+
+  @Override
+  public void setExclusions(final String val) {
+    exclusions = val;
   }
 
   @Override
@@ -134,6 +146,7 @@ public class CategoryConfigPropertiesImpl<T extends CategoryConfigPropertiesImpl
 
     ts.append("indexName", getIndexName());
     ts.append("dataPath", getDataPath());
+    ts.append("exclusions", getExclusions());
     ts.append("outDataPath", getOutDataPath());
     ts.append("indexMapping", getIndexMapping());
     ts.append("namespaces", getNamespaces());

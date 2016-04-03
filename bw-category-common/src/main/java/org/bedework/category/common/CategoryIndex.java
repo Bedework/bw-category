@@ -22,8 +22,6 @@ public class CategoryIndex extends Logged {
   private final IndexProperties idxprops;
   private final CategoryConfigProperties conf;
   
-  private final DocBuilder docBuilder;
-  
   /** Index we are currently working with */
   private String targetIndex;
   
@@ -32,8 +30,6 @@ public class CategoryIndex extends Logged {
           throws CategoryException {
     this.idxprops = idxprops;
     this.conf = conf;
-    
-    docBuilder = new DocBuilder();    
   }
 
   /** Create a new index and make it current
@@ -51,6 +47,16 @@ public class CategoryIndex extends Logged {
 
     return targetIndex;
   }
+  
+  public List<String> purgeIndexes() throws CategoryException {
+    try {
+      return getEsUtil().purgeIndexes(
+              Collections.singleton(conf.getIndexName()));
+    } catch (final Throwable t) {
+      throw new CategoryException(t);
+    }
+  }
+
 
   /** Parse the dmoz data and store it in the current index
    * 
@@ -107,8 +113,8 @@ public class CategoryIndex extends Logged {
 
     cat.setLast(hes.get(cat.getHrefDepth() - 1).getDisplayName());
     cat.setLowerLast(cat.getLast().toLowerCase());
-    
-    EsDocInfo di = docBuilder.makeDoc(cat);
+
+    EsDocInfo di = new DocBuilder().makeDoc(cat);
     
     try {
       getEsUtil().indexDoc(di, targetIndex);
