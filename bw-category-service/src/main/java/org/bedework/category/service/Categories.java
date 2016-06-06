@@ -19,7 +19,7 @@
 package org.bedework.category.service;
 
 import org.bedework.category.common.CategoryException;
-import org.bedework.category.common.CategoryIndex;
+import org.bedework.category.impl.CategoryIndex;
 import org.bedework.util.elasticsearch.EsCtlMBean;
 import org.bedework.util.elasticsearch.EsUtil;
 import org.bedework.util.jmx.ConfBase;
@@ -122,9 +122,9 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
         final String targetIndex = indexer.newIndex();
         info("Indexing to " + targetIndex);
         
-        indexer.parseDmoz(infoLines);
+        indexer.parseDmoz(infoLines, targetIndex);
         
-        indexer.makeProduction();
+        indexer.makeProduction(targetIndex);
         
         return true;
       } catch (final Throwable t) {
@@ -136,7 +136,7 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
     }
   }
   
-  private Processor reindexer;
+  private Processor indexer;
 
   /**
    */
@@ -255,24 +255,31 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
 
   @Override
   public void reindex() {
-    final String st = ProcessorThread.checkStarted(reindexer);
+    if (!rebuildIndex()) {
+      error("Failed to rebuild");
+    }
+  }
+
+  @Override
+  public void index() {
+    final String st = ProcessorThread.checkStarted(indexer);
     if (statusRunning.equals(st)) {
       error("Already started");
       return;
     }
 
-    reindexer = new Processor("dmz-reindexer");
-    reindexer.start();
+    indexer = new Processor("dmz-indexer");
+    indexer.start();
   }
 
   @Override
-  public void stopReindex() {
-    if (reindexer == null) {
+  public void stopIndex() {
+    if (indexer == null) {
       return;
     }
 
-    ProcessorThread.stop(reindexer);
-    reindexer = null;
+    ProcessorThread.stop(indexer);
+    indexer = null;
   }
 
   @Override
@@ -313,11 +320,11 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
 
   @Override
   public String getStatus() {
-    if (reindexer == null) {
+    if (indexer == null) {
       return statusStopped;
     }
     
-    return reindexer.getStatus();
+    return indexer.getStatus();
   }
 
   @Override
@@ -332,6 +339,29 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
   /* ====================================================================
    *                   Private methods
    * ==================================================================== */
+
+  private boolean rebuildIndex() {
+    final CategoryIndex indexer;
+    final Categories cats = Categories.this;
+
+    try {
+      indexer = new CategoryIndex(getEsCtl(), cats);
+
+      final String targetIndex = indexer.newIndex();
+      info("Reindexing to " + targetIndex);
+
+      indexer.reIndex(targetIndex);
+
+      indexer.makeProduction(targetIndex);
+
+      return true;
+    } catch (final Throwable t) {
+      error("Unable to reindex");
+      error(t);
+      setStatus(statusFailed);
+      return false;
+    }
+  }
 
   /**
    * @param val number

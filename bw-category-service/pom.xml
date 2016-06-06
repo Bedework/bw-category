@@ -27,7 +27,12 @@
     <dependency>
       <groupId>org.bedework</groupId>
       <artifactId>bw-category-common</artifactId>
-      <version>4.0.0-SNAPSHOT</version>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bedework</groupId>
+      <artifactId>bw-category-impl</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>

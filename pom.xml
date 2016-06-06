@@ -88,6 +88,8 @@
 		<module>bw-category-war</module>
 		<module>bw-category-ear</module>
     <module>bw-category-service</module>
+    <module>bw-category-impl</module>
+    <module>bw-category-ical</module>
   </modules>
 
 	<dependencyManagement>

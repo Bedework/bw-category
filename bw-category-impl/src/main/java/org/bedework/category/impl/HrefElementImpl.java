@@ -16,17 +16,39 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.category.common;
+package org.bedework.category.impl;
+
+import org.bedework.category.common.Category;
+import org.bedework.util.misc.ToString;
 
 /**
- * User: mike Date: 3/9/16 Time: 23:54
+ * User: mike
+ * Date: 5/6/15
+ * Time: 3:38 PM
  */
-public class CategoryException extends Exception {
-  public CategoryException(Throwable t) {
-    super(t);
-  }
-  
-  public CategoryException(final String msg) {
-    super(msg);
-  }
+class HrefElementImpl implements Category.HrefElement {
+    private String displayName;
+
+    /** for Json
+     *
+     */
+    public HrefElementImpl() {
+    }
+
+    public HrefElementImpl(final String displayName) {
+        this.displayName = displayName;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public String toString() {
+        final ToString ts = new ToString(this);
+
+        ts.append("displayName", getDisplayName());
+
+        return ts.toString();
+    }
 }

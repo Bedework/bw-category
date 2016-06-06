@@ -19,9 +19,11 @@
 package org.bedework.category.web;
 
 import org.bedework.category.common.Category;
+import org.bedework.category.common.SearchResultItem;
 import org.bedework.util.misc.Util;
 import org.bedework.util.servlet.ReqUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -46,6 +48,11 @@ public class GetMethod extends CategoryMethodBase {
 
       if (resName.equals("category")) {
         processCategory(resourceUri, req, resp);
+        return;
+      }
+
+      if (resName.equals("categories")) {
+        processCategories(resourceUri, req, resp);
         return;
       }
 
@@ -78,6 +85,40 @@ public class GetMethod extends CategoryMethodBase {
       }
 
       writeJson(cat, resp);
+    } catch (final ServletException se) {
+      throw se;
+    } catch(final Throwable t) {
+      throw new ServletException(t);
+    }
+  }
+
+  private void processCategories(final List<String> resourceUri,
+                                 final HttpServletRequest req,
+                                 final HttpServletResponse resp) throws ServletException {
+    ReqUtil rutil = new ReqUtil(req, resp);
+
+    try {
+      final List<SearchResultItem> sris =
+              getIndex().find(rutil.getReqPar("q"), 
+                              rutil.getReqPar("pfx"), 30);
+
+      final boolean href = rutil.present("href");
+      
+      if (!href) {
+        writeJson(sris, resp);
+        return;
+      }
+      
+      final List<SearchResultItem> res = new ArrayList<>();
+        
+      for (final SearchResultItem sri: sris) {
+        final Category scat = sri.getCategory();
+          
+        res.add(new SearchResultItem(scat.getHref(), 
+                                     sri.getScore()));
+      }
+
+      writeJson(res, resp);
     } catch (final ServletException se) {
       throw se;
     } catch(final Throwable t) {

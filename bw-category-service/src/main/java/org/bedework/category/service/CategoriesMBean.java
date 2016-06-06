@@ -36,14 +36,20 @@ public interface CategoriesMBean extends ConfBaseMBean,
   /** Reindex the data
    *
    */
-  @MBeanInfo("Reindex the data")
+  @MBeanInfo("Reindex the current data")
   void reindex();
 
-  /** Stop any running reindex of data
+  /** Index the data
    *
    */
-  @MBeanInfo("Stop reindexing the data")
-  void stopReindex();
+  @MBeanInfo("Index the dmoz data file")
+  void index();
+
+  /** Stop any running index of data
+   *
+   */
+  @MBeanInfo("Stop indexing the data")
+  void stopIndex();
 
   /** List indexes
    *

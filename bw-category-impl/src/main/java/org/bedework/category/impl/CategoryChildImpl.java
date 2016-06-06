@@ -16,8 +16,9 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.category.common;
+package org.bedework.category.impl;
 
+import org.bedework.category.common.Category;
 import org.bedework.util.misc.ToString;
 
 import org.apache.commons.lang.builder.CompareToBuilder;

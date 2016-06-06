@@ -19,6 +19,7 @@
 package org.bedework.category.web;
 
 import org.bedework.category.service.Categories;
+import org.bedework.util.elasticsearch.EsCtl;
 import org.bedework.util.elasticsearch.EsCtlMBean;
 import org.bedework.util.jmx.ConfBase;
 import org.bedework.util.jmx.MBeanUtil;
@@ -98,6 +99,7 @@ public class CategoryServlet extends ServletBase {
 
   static class Configurator extends ConfBase {
     Categories categories;
+    EsCtl esCtl;
 
     Configurator() {
       super("org.bedework.categories:service=Categories");
@@ -119,6 +121,12 @@ public class CategoryServlet extends ServletBase {
 
         categories.loadConfig();
 //        categories.start();
+        
+        esCtl = new EsCtl();
+        register(new ObjectName(esCtl.getServiceName()),
+                 esCtl);
+
+        esCtl.loadConfig();
       } catch (Throwable t){
         t.printStackTrace();
       }

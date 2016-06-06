@@ -20,7 +20,7 @@ package org.bedework.category.web;
 
 import org.bedework.category.common.CategoryConfigProperties;
 import org.bedework.category.common.CategoryException;
-import org.bedework.category.common.CategoryIndex;
+import org.bedework.category.impl.CategoryIndex;
 import org.bedework.util.elasticsearch.IndexProperties;
 import org.bedework.util.servlet.MethodBase;
 

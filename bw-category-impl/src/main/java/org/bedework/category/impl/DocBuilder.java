@@ -16,8 +16,10 @@
     specific language governing permissions and limitations
     under the License.
 */
-package org.bedework.category.common;
+package org.bedework.category.impl;
 
+import org.bedework.category.common.Category;
+import org.bedework.category.common.CategoryException;
 import org.bedework.util.elasticsearch.EsDocInfo;
 import org.bedework.util.misc.Util;
 

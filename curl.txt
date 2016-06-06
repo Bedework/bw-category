@@ -1,0 +1,76 @@
+curl -XGET 'http://localhost:9200/categories/_search?pretty=true' -d '
+{
+  "query" : {
+    "function_score" : {
+      "query" : {
+        "bool" : {
+          "should" : {
+            "match" : {
+              "href.autocathref" : {
+                "query" : "Some text about baseball"
+              }
+            }
+          }
+        }
+      },
+      "functions" : [ {
+        "filter" : {
+          "match" : {
+            "lowerLast" : "some text about baseball"
+          }
+        },
+        "weight" : 30.0
+      }, {
+        "field_value_factor" : {
+          "field" : "hrefDepth",
+          "factor" : 10.0,
+          "modifier" : "reciprocal"
+        }
+      } ]
+    }
+  },
+  "fields": ["href"]
+}'
+
+curl -XGET 'http://localhost:9200/categories/_search?pretty=true' -d '
+{
+  "query" : {
+    "function_score" : {
+      "query" : {
+        "bool" : {
+          "must" : {
+            "prefix": {"href": "/dmoz/Sports"}
+          },
+          "should" : {
+            "multi_match" : {
+              "query" : "some text about baseball",
+              "fields" : [ "last.matcher^30", "href.autocathref" ] 
+            }
+          }
+        }
+      },
+      "functions" : [ {
+        "field_value_factor" : {
+          "field" : "hrefDepth",
+          "factor" : 10.0,
+          "modifier" : "reciprocal"
+        }
+      } ]
+    }
+  },
+  "fields": ["href"]
+}'
+
+curl -XGET 'http://localhost:9200/categories/_search?pretty=true' -d '
+{
+  "query" : {
+    "multi_match" : {
+      "query" : "some text about baseball",
+      "fields" : [ "last.matcher^3", "href.autocathref" ] 
+    }
+  },
+  "fields": ["href"]
+}'
+
+curl -XGET 'http://localhost:8080/bwcat/categories/?q=some+text+about+baseball&pfx=/dmoz/Sports/&href'
+

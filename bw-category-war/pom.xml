@@ -22,6 +22,12 @@
 
     <dependency>
       <groupId>org.bedework</groupId>
+      <artifactId>bw-category-impl</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bedework</groupId>
       <artifactId>bw-util-http</artifactId>
     </dependency>
     <dependency>
