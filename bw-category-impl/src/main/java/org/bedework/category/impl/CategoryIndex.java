@@ -363,10 +363,17 @@ public class CategoryIndex extends Logged {
 
     final List<Category.HrefElement> hes = new ArrayList<>(els.length);
 
-    // skip empty strings - should have one at start
+    /* skip empty strings - should have one at start
+       skip length 1 strings - usually just an alpha group
+     */
 
     for (final String s: els) {
       if (s.length() == 0) {
+        continue;
+      }
+
+      if (s.length() == 1) {
+        // Should we checks for some special ones? e.g. "C"
         continue;
       }
 

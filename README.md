@@ -12,7 +12,7 @@ http://localhost:8080/bwcat/category/dmoz/Sports/
 ### Search for a category with a string
 
 ## Deploying
-
+```
 cd bw-category-ear
 mvn bw-deploy:deploy-ears
-
+```

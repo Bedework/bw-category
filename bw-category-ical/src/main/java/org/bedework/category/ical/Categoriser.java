@@ -47,7 +47,7 @@ public class Categoriser {
     System.exit(0);
   }
 
-  static String catsUrl = "http:localhost:8080/bwcat/";
+  static String catsUrl = "http://localhost:8080/bwcat/";
   static String prefix;
   static String ics;
 
@@ -103,8 +103,13 @@ public class Categoriser {
       for (final Object o : calendar.getComponents()) {
         Component component = (Component)o;
 
+        if (component.getName().equals(Component.VTIMEZONE)) {
+          continue;
+        }
+        
         String dtstart = null;
         String summary = null;
+        String categories = "     ";
         String val = "";
         
         for (final Object o1 : component.getProperties()) {
@@ -112,7 +117,7 @@ public class Categoriser {
           
           final String nm = property.getName();
 
-          switch (property.getName()) {
+          switch (nm) {
             case Property.DTSTART: 
               dtstart = property.getValue();
               continue;
@@ -123,9 +128,13 @@ public class Categoriser {
               continue;
 
             case Property.CATEGORIES:
+              val += " " + property.getValue();
+              categories += property.getValue() + " ";
+              continue;
+              
             case Property.COMMENT:
             case Property.DESCRIPTION:
-              val = val + " " + property.getValue();
+              val += " " + property.getValue();
               continue;
 
           }
@@ -141,6 +150,8 @@ public class Categoriser {
           
           System.out.println("Dtstart: " + dtstart +
                   " summary: " + summary);
+          System.out.println(categories);
+          
           System.out.println(getString(sb.toString()));
         }
       }
@@ -192,6 +203,7 @@ public class Categoriser {
     Logger.getLogger(Categoriser.class).info(msg);
   }
 
+  @SuppressWarnings("unused")
   static void warn(final String msg) {
     Logger.getLogger(Categoriser.class).warn(msg);
   }
