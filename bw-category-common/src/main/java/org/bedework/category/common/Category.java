@@ -23,7 +23,7 @@ import org.bedework.util.misc.ToString;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Representation of dmoz topic.
+/** Representation of category. Based on dmoz topic.
  *
  * User: mike
  */

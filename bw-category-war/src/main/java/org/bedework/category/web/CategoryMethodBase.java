@@ -18,18 +18,23 @@
 */
 package org.bedework.category.web;
 
+import org.bedework.category.common.Category;
 import org.bedework.category.common.CategoryConfigProperties;
 import org.bedework.category.common.CategoryException;
 import org.bedework.category.impl.CategoryIndex;
 import org.bedework.util.elasticsearch.IndexProperties;
+import org.bedework.util.misc.Util;
 import org.bedework.util.servlet.MethodBase;
+import org.bedework.util.xml.XmlEmit;
+import org.bedework.util.xml.XmlEmit.NameSpace;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.log4j.Logger;
 
 import java.text.SimpleDateFormat;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.namespace.QName;
 
 /** Base class for all webdav servlet methods.
  */
@@ -40,6 +45,53 @@ public abstract class CategoryMethodBase extends MethodBase {
   protected CategoryIndex index;
   
   private ObjectMapper objectMapper = new ObjectMapper();
+  
+  private XmlEmit rdfEmit;
+  
+  public static final String rdfNamespace = 
+          "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+
+  public static final String skosNamespace =
+          "http://www.w3.org/2004/02/skos/core#";
+  
+  private static NameSpace[] rdfNamespaces = {
+          new NameSpace(rdfNamespace,
+                        "rdf"),
+          new NameSpace(skosNamespace,
+                        "skos")
+  };
+
+  /**   */
+  public static final QName rdf = new QName(rdfNamespace,
+                                            "RDF");
+
+  /**   */
+  public static final QName broader = new QName(skosNamespace,
+                                                  "broader");
+
+  /**   */
+  public static final QName concept = new QName(skosNamespace,
+                                                "Concept");
+
+  /**   */
+  public static final QName definition = new QName(skosNamespace,
+                                                "definition");
+
+  /**   */
+  public static final QName narrower = new QName(skosNamespace,
+                                             "narrower");
+
+  /**   */
+  public static final QName note = new QName(skosNamespace,
+                                                "note");
+
+  /**   */
+  public static final QName related = new QName(skosNamespace,
+                                             "related");
+
+  /**   */
+  public static final QName prefLabel = new QName(skosNamespace,
+                                                    "prefLabel");
 
   @Override
   public void init() throws ServletException {
@@ -82,43 +134,49 @@ public abstract class CategoryMethodBase extends MethodBase {
     return index;
   }
 
-  /** ===================================================================
-   *                   Logging methods
-   *  =================================================================== */
-
-  /**
-   * @return Logger
-   */
-  protected Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
+  protected XmlEmit getRdfEmit() throws ServletException {
+    if (rdfEmit != null) {
+      return rdfEmit;
     }
 
-    return log;
-  }
+    rdfEmit = new XmlEmit(false);
 
-  protected void debugMsg(final String msg) {
-    getLogger().debug(msg);
-  }
+    try {
+      for (final NameSpace ns : rdfNamespaces) {
+        rdfEmit.addNs(ns, false);
+      }
+    } catch (Throwable t) {
+      throw new ServletException(t);
+    }
 
-  protected void error(final Throwable t) {
-    getLogger().error(this, t);
+    return rdfEmit;
   }
+  
+  protected void writeRdf(final Category cat,
+                          final HttpServletResponse resp) throws ServletException {
+    try {
+      XmlEmit xml = getRdfEmit();
+    
+      xml.startEmit(resp.getWriter());
+      
+      xml.openTag(rdf);
 
-  protected void error(final String msg) {
-    getLogger().error(msg);
-  }
+      xml.openTag(concept, "rdf:about", cat.getHref());
+      
+      xml.property(prefLabel, cat.getTitle());
+      xml.property(definition, cat.getDescription());
+      
+      if (!Util.isEmpty(cat.getChildren())) {
+        for (final Category.CategoryChild ch: cat.getChildren()) {
+          xml.emptyTag(narrower, "rdf:resource", ch.getHref());
+        }
+      }
+      xml.closeTag(concept);
 
-  protected void warn(final String msg) {
-    getLogger().warn(msg);
-  }
-
-  protected void logIt(final String msg) {
-    getLogger().info(msg);
-  }
-
-  protected void trace(final String msg) {
-    getLogger().debug(msg);
+      xml.closeTag(rdf);
+    } catch (Throwable t) {
+      throw new ServletException(t);
+    }
   }
 }
 

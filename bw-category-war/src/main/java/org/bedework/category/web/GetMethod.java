@@ -83,8 +83,18 @@ public class GetMethod extends CategoryMethodBase {
         resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
         return;
       }
+      
+      final String accept = req.getHeader("Accept");
+      final boolean rdf = 
+              (accept != null) && 
+                      (accept.contains("application/xml") ||
+                               (accept.contains("application/rdf+xml")));
 
-      writeJson(cat, resp);
+      if (rdf) {
+        writeRdf(cat, resp);
+      } else {
+        writeJson(cat, resp);
+      }
     } catch (final ServletException se) {
       throw se;
     } catch(final Throwable t) {
