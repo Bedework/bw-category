@@ -14,7 +14,7 @@
 		<maven.source.plugin.version>2.1.2</maven.source.plugin.version>
 		<!-- Bedework Versions -->
 		<bw-ws.version>4.0.4</bw-ws.version>
-		<bw-util.version>4.0.13</bw-util.version>
+		<bw-util.version>4.0.14-SNAPSHOT</bw-util.version>
 		<bw-access.version>4.0.1</bw-access.version>
 
     <ical4j.groupId>org.bedework.ical4j</ical4j.groupId>

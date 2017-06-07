@@ -21,6 +21,7 @@ package org.bedework.category.web;
 import org.bedework.category.common.Category;
 import org.bedework.category.common.CategoryConfigProperties;
 import org.bedework.category.common.CategoryException;
+import org.bedework.category.common.SearchResultItem;
 import org.bedework.category.impl.CategoryIndex;
 import org.bedework.util.elasticsearch.IndexProperties;
 import org.bedework.util.misc.Util;
@@ -31,6 +32,7 @@ import org.bedework.util.xml.XmlEmit.NameSpace;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
@@ -47,6 +49,8 @@ public abstract class CategoryMethodBase extends MethodBase {
   private ObjectMapper objectMapper = new ObjectMapper();
   
   private XmlEmit rdfEmit;
+
+  private XmlEmit htmlEmit;
   
   public static final String rdfNamespace = 
           "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
@@ -92,6 +96,38 @@ public abstract class CategoryMethodBase extends MethodBase {
   /**   */
   public static final QName prefLabel = new QName(skosNamespace,
                                                     "prefLabel");
+
+  /* HTML tags */
+
+  /**   */
+  public static final QName address = new QName(null, "a");
+
+  /**   */
+  public static final QName body = new QName(null, "body");
+
+  /**   */
+  public static final QName div = new QName(null, "div");
+
+  /**   */
+  public static final QName html = new QName(null, "html");
+  
+  /**   */
+  public static final QName head = new QName(null, "head");
+
+  /**   */
+  public static final QName header2 = new QName(null, "h2");
+
+  /**   */
+  public static final QName li = new QName(null, "li");
+
+  /**   */
+  public static final QName para = new QName(null, "p");
+
+  /**   */
+  public static final QName title = new QName(null, "title");
+
+  /**   */
+  public static final QName ul = new QName(null, "ul");
 
   @Override
   public void init() throws ServletException {
@@ -151,6 +187,16 @@ public abstract class CategoryMethodBase extends MethodBase {
 
     return rdfEmit;
   }
+
+  protected XmlEmit getHtmlEmit() throws ServletException {
+    if (htmlEmit != null) {
+      return htmlEmit;
+    }
+
+    htmlEmit = XmlEmit.getHtmlEmitter();
+
+    return htmlEmit;
+  }
   
   protected void writeRdf(final Category cat,
                           final HttpServletResponse resp) throws ServletException {
@@ -177,6 +223,157 @@ public abstract class CategoryMethodBase extends MethodBase {
     } catch (Throwable t) {
       throw new ServletException(t);
     }
+  }
+
+  protected void writeHtml(final Category cat,
+                           final HttpServletResponse resp) throws ServletException {
+    try {
+      resp.setContentType("text/html");
+
+      XmlEmit xml = getHtmlEmit();
+
+      xml.startEmit(resp.getWriter());
+
+      xml.openTag(html);
+      xml.openTag(head);
+      xml.property(title, cat.getTitle());
+      xml.closeTag(head);
+
+      xml.openTag(body);
+
+      writeHtmlCat(xml, cat);
+      
+      xml.closeTag(body);
+      xml.closeTag(html);
+    } catch (Throwable t) {
+      throw new ServletException(t);
+    }
+  }
+
+  protected void writeHtml(final List<SearchResultItem> sris,
+                           final HttpServletResponse resp,
+                           final boolean hrefOnly) throws ServletException {
+    try {
+      resp.setContentType("text/html");
+      
+      XmlEmit xml = getHtmlEmit();
+
+      xml.startEmit(resp.getWriter());
+
+      xml.openTag(html);
+      xml.openTag(head);
+      xml.property(title, "Search result");
+      xml.closeTag(head);
+
+      xml.openTag(body);
+      xml.property(para, "Found: " + sris.size());
+
+      if (hrefOnly) {
+        xml.openTag(ul);
+      }
+      
+      for (final SearchResultItem sri: sris) {
+        final Category cat = sri.getCategory();
+        
+        if (!hrefOnly) {
+          writeHtmlCat(xml, cat);
+        } else {
+          xml.openTag(li);
+          xml.openTag(address, "href", catHref(cat.getHref()) + "?format=html");
+          xml.value(catLabel(cat));
+          xml.closeTag(address);
+          xml.closeTag(li);
+        }
+      }
+
+      if (hrefOnly) {
+        xml.closeTag(ul);
+      }
+
+      xml.closeTag(body);
+      xml.closeTag(html);
+    } catch (Throwable t) {
+      throw new ServletException(t);
+    }
+  }
+
+  protected String catHref(final String href) {
+    return Util.buildPath(true, "/bwcat/category/",
+                          href); // TODO - use context in request
+  }
+  
+  protected String catLabel(final Category cat) {
+    if (cat.getTitle() != null) {
+      return cat.getTitle();
+    }
+    
+    return cat.getHref();
+  }
+
+  protected void writeHtmlCat(final XmlEmit xml,
+                              final Category cat) throws ServletException {
+    try {
+      xml.openTag(div);
+      xml.property(header2, cat.getTitle());
+
+      xml.openTag(para);
+      xml.openTag(address, "href", catHref(cat.getHref()));
+      xml.value("RDF format");
+      xml.closeTag(address);
+      xml.closeTag(para);
+
+
+      final String parent = parent(cat.getHref());
+      
+      if (parent != null) {
+        xml.openTag(para);
+        xml.openTag(address, "href", catHref(parent) + "?format=html");
+        xml.value("parent");
+        xml.closeTag(address);
+        xml.closeTag(para);
+      }
+
+      xml.property(para, cat.getDescription());
+
+      if (!Util.isEmpty(cat.getChildren())) {
+        xml.openTag(ul);
+
+        for (final Category.CategoryChild ch: cat.getChildren()) {
+          xml.openTag(li);
+          xml.openTag(address, "href", 
+                      catHref(ch.getHref()) + "?format=html");
+          xml.value(ch.getHref());
+          xml.closeTag(address);
+          xml.closeTag(li);
+        }
+        
+        xml.closeTag(ul);
+      }
+
+      xml.closeTag(div);
+    } catch (Throwable t) {
+      throw new ServletException(t);
+    }
+  }
+  
+  private String parent(final String href) {
+    if ((href == null) || (href.length() <= 2)) {
+      return null;
+    }
+    
+    int index = href.length() - 1;
+    
+    if (href.charAt(index) == '/') {
+      index--;
+    }
+
+    index = href.lastIndexOf('/', index);
+    
+    if (index < 0) {
+      return null;
+    }
+    
+    return href.substring(0, index);
   }
 }
 

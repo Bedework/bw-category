@@ -85,13 +85,24 @@ public class GetMethod extends CategoryMethodBase {
       }
       
       final String accept = req.getHeader("Accept");
-      final boolean rdf = 
-              (accept != null) && 
-                      (accept.contains("application/xml") ||
-                               (accept.contains("application/rdf+xml")));
+      final String format = rutil.getReqPar("format");
+      
+      boolean rdf ="rdf".equals(format);
+      boolean html ="html".equals(format);
+      
+      if (!rdf && !html) {
+        rdf = (accept != null) &&
+                 (accept.contains("application/xml") ||
+                          (accept.contains("application/rdf+xml")));
+
+        html = (accept != null) &&
+                accept.contains("text/html");
+      }
 
       if (rdf) {
         writeRdf(cat, resp);
+      } else if (html) {
+        writeHtml(cat, resp);
       } else {
         writeJson(cat, resp);
       }
@@ -112,8 +123,20 @@ public class GetMethod extends CategoryMethodBase {
               getIndex().find(rutil.getReqPar("q"), 
                               rutil.getReqPar("pfx"), 30);
 
+      final String accept = req.getHeader("Accept");
+
+      final boolean html =
+              "html".equals(rutil.getReqPar("format")) ||
+                      ((accept != null) &&
+                               accept.contains("text/html"));
+
       final boolean href = rutil.present("href");
-      
+
+      if (html) {
+        writeHtml(sris, resp, href);
+        return;
+      }
+
       if (!href) {
         writeJson(sris, resp);
         return;
