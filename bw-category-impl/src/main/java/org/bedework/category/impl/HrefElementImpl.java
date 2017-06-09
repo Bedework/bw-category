@@ -26,29 +26,29 @@ import org.bedework.util.misc.ToString;
  * Date: 5/6/15
  * Time: 3:38 PM
  */
-class HrefElementImpl implements Category.HrefElement {
-    private String displayName;
+public class HrefElementImpl implements Category.HrefElement {
+  private String displayName;
 
-    /** for Json
-     *
-     */
-    public HrefElementImpl() {
-    }
+  /** for Json
+   *
+   */
+  public HrefElementImpl() {
+  }
 
-    public HrefElementImpl(final String displayName) {
-        this.displayName = displayName;
-    }
+  public HrefElementImpl(final String displayName) {
+    this.displayName = displayName;
+  }
 
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
+  @Override
+  public String getDisplayName() {
+    return displayName;
+  }
 
-    public String toString() {
-        final ToString ts = new ToString(this);
+  public String toString() {
+    final ToString ts = new ToString(this);
 
-        ts.append("displayName", getDisplayName());
+    ts.append("displayName", getDisplayName());
 
-        return ts.toString();
-    }
+    return ts.toString();
+  }
 }

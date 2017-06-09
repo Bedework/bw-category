@@ -75,9 +75,17 @@ public class GetMethod extends CategoryMethodBase {
       sendJsonError(resp, "failed");
       return;
     }
+    
+    boolean fromRemote = false;
 
     try {
       Category cat = getIndex().getCategory(href);
+
+      if ((cat == null) && !config.getPrimaryServer()) {
+        // Try remote retrievals
+        cat = getRemote(href);
+        fromRemote = true;
+      }
 
       if (cat == null) {
         resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -106,6 +114,22 @@ public class GetMethod extends CategoryMethodBase {
       } else {
         writeJson(cat, resp);
       }
+      
+      if (fromRemote) {
+        // Should we cache it?
+        if (config.getToken() == null) {
+          return;
+        }
+
+        final String token = rutil.getReqPar("token");
+        final boolean store = rutil.present("store");
+        
+        if (!store || !config.getToken().equals(token)) {
+          return;
+        }
+        
+        // TODO - store the category
+      }
     } catch (final ServletException se) {
       throw se;
     } catch(final Throwable t) {
@@ -119,9 +143,16 @@ public class GetMethod extends CategoryMethodBase {
     ReqUtil rutil = new ReqUtil(req, resp);
 
     try {
-      final List<SearchResultItem> sris =
-              getIndex().find(rutil.getReqPar("q"), 
-                              rutil.getReqPar("pfx"), 30);
+      final boolean primary = rutil.present("primary");
+      final String q = rutil.getReqPar("q");
+      final String pfx = rutil.getReqPar("pfx");
+
+      final List<SearchResultItem> sris;
+      if (primary) {
+        sris = findRemote(q, pfx);
+      } else {
+        sris = getIndex().find(q, pfx, 30);
+      }
 
       final String accept = req.getHeader("Accept");
 

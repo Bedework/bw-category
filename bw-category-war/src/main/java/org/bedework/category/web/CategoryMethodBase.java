@@ -22,16 +22,26 @@ import org.bedework.category.common.Category;
 import org.bedework.category.common.CategoryConfigProperties;
 import org.bedework.category.common.CategoryException;
 import org.bedework.category.common.SearchResultItem;
+import org.bedework.category.impl.CategoryChildImpl;
 import org.bedework.category.impl.CategoryIndex;
+import org.bedework.category.impl.HrefElementImpl;
 import org.bedework.util.elasticsearch.IndexProperties;
+import org.bedework.util.http.BasicHttpClient;
 import org.bedework.util.misc.Util;
 import org.bedework.util.servlet.MethodBase;
 import org.bedework.util.xml.XmlEmit;
 import org.bedework.util.xml.XmlEmit.NameSpace;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.apache.http.Header;
+import org.apache.http.message.BasicHeader;
 
+import java.io.InputStream;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -46,7 +56,9 @@ public abstract class CategoryMethodBase extends MethodBase {
   protected IndexProperties idxProps;
   protected CategoryIndex index;
   
-  private ObjectMapper objectMapper = new ObjectMapper();
+  private ObjectMapper objectMapper;
+  
+  private static BasicHttpClient client; 
   
   private XmlEmit rdfEmit;
 
@@ -149,11 +161,35 @@ public abstract class CategoryMethodBase extends MethodBase {
     this.dumpContent = dumpContent;
 
     debug = getLogger().isDebugEnabled();
+    
+    if (client == null) {
+      try {
+        client = new BasicHttpClient(1000 * 30);
+      } catch (final Throwable t) {
+        error(t);
+        throw new ServletException(t);
+      }
+    }
 
     init();
   }
   
   public ObjectMapper getMapper() {
+    if (objectMapper != null) {
+      return objectMapper;
+    }
+
+    objectMapper = new ObjectMapper();
+    
+    final SimpleModule sm = new SimpleModule();
+    
+    sm.addAbstractTypeMapping(Category.CategoryChild.class, 
+            CategoryChildImpl.class);
+    sm.addAbstractTypeMapping(Category.HrefElement.class,
+                              HrefElementImpl.class);
+    
+    objectMapper.registerModule(sm);
+
     return objectMapper;
   }
 
@@ -354,6 +390,102 @@ public abstract class CategoryMethodBase extends MethodBase {
     } catch (Throwable t) {
       throw new ServletException(t);
     }
+  }
+
+  protected Category getRemote(final String href) 
+          throws ServletException {
+    final List<String> servers = config.getServerList();
+
+    if (Util.isEmpty(servers)) {
+      return null;
+    }
+
+    try {
+      final BasicHttpClient cl = getClient();
+
+      final List<Header> headers = new ArrayList<>();
+      headers.add(new BasicHeader("Accept", "application/json"));
+
+      for (final String server: servers) {
+        final String urlStr =
+                endingSlash(server) +
+                        "category/" + 
+                        href;
+
+        final int status = cl.sendRequest("GET", urlStr, headers);
+        if ((status / 100) != 2) {
+          continue; // Try elsewhere
+        }
+
+        return readJsonCat(cl.getResponseBodyAsStream());
+      }
+
+      // Nowhere left to go
+      return null;
+    } catch (final ServletException se) {
+      throw se;
+    } catch(final Throwable t) {
+      throw new ServletException(t);
+    }
+  }
+
+  protected List<SearchResultItem> findRemote(final String q,
+                                              final String pfx)
+          throws ServletException {
+    final List<String> servers = config.getServerList();
+
+    if (Util.isEmpty(servers)) {
+      return null;
+    }
+
+    try {
+      final BasicHttpClient cl = getClient();
+
+      final List<Header> headers = new ArrayList<>();
+      headers.add(new BasicHeader("Accept", "application/json"));
+
+      for (final String server: servers) {
+        final String urlStr = 
+                endingSlash(server) +
+                        "categories/" +
+                        "?q=" + URLEncoder.encode(q, "UTF-8") +
+                        "&pfx=" + URLEncoder.encode(pfx, "UTF-8");
+
+        final int status = cl.sendRequest("GET", urlStr, headers);
+        if ((status % 100) != 2) {
+          continue; // Try elsewhere
+        }
+
+        return getMapper()
+                .readValue(cl.getResponseBodyAsStream(),
+                           new TypeReference<List<SearchResultItem>>(){});
+      }
+
+      // Nowhere left to go
+      return null;
+    } catch(final Throwable t) {
+      throw new ServletException(t);
+    }
+  }
+  
+  private String endingSlash(final String val) {
+    if (val.endsWith("/")) {
+      return val;
+    }
+    
+    return val + "/";
+  }
+  
+  protected Category readJsonCat(final InputStream str) throws ServletException {
+    try {
+      return getMapper().readValue(str, Category.class);
+    } catch (Throwable t) {
+      throw new ServletException(t);
+    }
+  }
+  
+  protected BasicHttpClient getClient() {
+    return client;    
   }
   
   private String parent(final String href) {

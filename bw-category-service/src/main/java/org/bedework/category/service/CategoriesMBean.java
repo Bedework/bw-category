@@ -45,6 +45,12 @@ public interface CategoriesMBean extends ConfBaseMBean,
   @MBeanInfo("Index the dmoz data file")
   void index();
 
+  /** Create a new empty production index
+   *
+   */
+  @MBeanInfo("Create a new empty production index")
+  void createIndex();
+
   /** Stop any running index of data
    *
    */

@@ -23,6 +23,8 @@ import org.bedework.util.config.ConfInfo;
 import org.bedework.util.config.ConfigBase;
 import org.bedework.util.misc.ToString;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /** These are the system properties that the server needs to know about, either
@@ -45,6 +47,12 @@ public class CategoryConfigPropertiesImpl<T extends CategoryConfigPropertiesImpl
   private String outDataPath;
 
   private String indexMapping;
+
+  private boolean primaryServer;
+
+  private String token;
+
+  private String servers;
 
   private List<String> namespaces;
 
@@ -99,6 +107,36 @@ public class CategoryConfigPropertiesImpl<T extends CategoryConfigPropertiesImpl
   }
 
   @Override
+  public void setPrimaryServer(final boolean val) {
+    primaryServer = val;
+  }
+
+  @Override
+  public boolean getPrimaryServer() {
+    return primaryServer;
+  }
+
+  @Override
+  public void setToken(final String val) {
+    token = val;
+  }
+
+  @Override
+  public String getToken() {
+    return token;
+  }
+
+  @Override
+  public void setServers(final String val) {
+    servers = val;
+  }
+
+  @Override
+  public String getServers() {
+    return servers;
+  }
+
+  @Override
   public void setNamespaces(final List<String> val) {
     namespaces = val;
   }
@@ -137,6 +175,18 @@ public class CategoryConfigPropertiesImpl<T extends CategoryConfigPropertiesImpl
   }
 
   /* ====================================================================
+   *                   Convenience methods
+   * ==================================================================== */
+  
+  public List<String> getServerList() {
+    if (getServers() == null) {
+      return Collections.emptyList();
+    }
+    
+    return Arrays.asList(getServers().split(","));
+  }
+
+  /* ====================================================================
    *                   Object methods
    * ==================================================================== */
 
@@ -149,6 +199,9 @@ public class CategoryConfigPropertiesImpl<T extends CategoryConfigPropertiesImpl
     ts.append("exclusions", getExclusions());
     ts.append("outDataPath", getOutDataPath());
     ts.append("indexMapping", getIndexMapping());
+    ts.append("primaryServer", getPrimaryServer());
+    ts.append("token", getToken());
+    ts.append("servers", getServers());
     ts.append("namespaces", getNamespaces());
 
     return ts.toString();

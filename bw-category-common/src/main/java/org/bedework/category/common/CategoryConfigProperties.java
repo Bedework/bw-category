@@ -97,6 +97,51 @@ public interface CategoryConfigProperties {
 
   /**
    *
+   * @param val true for primary server
+   */
+  void setPrimaryServer(boolean val);
+
+  /**
+   *
+   * @return true for primary server
+   */
+  @MBeanInfo("true for primary server")
+  boolean getPrimaryServer();
+
+  /**
+   *
+   * @param val token to allow updates
+   */
+  void setToken(String val);
+
+  /**
+   *
+   * @return token to allow updates
+   */
+  @MBeanInfo("token to allow updates")
+  String getToken();
+
+  /**
+   *
+   * @param val comma separated list of primary server prefixes
+   */
+  void setServers(String val);
+
+  /** 
+   *
+   * @return comma separated list of primary server prefixes
+   */
+  @MBeanInfo("comma separated list of primary server prefixes")
+  String getServers();
+
+  /**
+   * 
+   * @return empty list or split servers.
+   */
+  List<String> getServerList();
+
+  /**
+   *
    * @param val namespaces, abbrev + uri
    */
   void setNamespaces(List<String> val);

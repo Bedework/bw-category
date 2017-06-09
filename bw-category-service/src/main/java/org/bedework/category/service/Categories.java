@@ -249,6 +249,41 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
     return getConfig().getIndexMapping();
   }
 
+  @Override
+  public void setPrimaryServer(final boolean val) {
+    getConfig().setPrimaryServer(val);
+  }
+
+  @Override
+  public boolean getPrimaryServer() {
+    return getConfig().getPrimaryServer();
+  }
+
+  @Override
+  public void setToken(final String val) {
+    getConfig().setToken(val);
+  }
+
+  @Override
+  public String getToken() {
+    return getConfig().getToken();
+  }
+
+  @Override
+  public void setServers(final String val) {
+    getConfig().setServers(val);
+  }
+
+  @Override
+  public String getServers() {
+    return getConfig().getServers();
+  }
+
+  @Override
+  public List<String> getServerList() {
+    return getConfig().getServerList();
+  }
+
   /* ========================================================================
    * Operations
    * ======================================================================== */
@@ -270,6 +305,25 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
 
     indexer = new Processor("dmz-indexer");
     indexer.start();
+  }
+
+  @Override
+  public void createIndex() {
+    final CategoryIndex indexer;
+    final Categories cats = Categories.this;
+
+    try {
+      indexer = new CategoryIndex(getEsCtl(), cats);
+
+      final String targetIndex = indexer.newIndex();
+      info("New index " + targetIndex);
+
+      indexer.makeProduction(targetIndex);
+    } catch (final Throwable t) {
+      error("Unable to create index");
+      error(t);
+      setStatus(statusFailed);
+    }
   }
 
   @Override
