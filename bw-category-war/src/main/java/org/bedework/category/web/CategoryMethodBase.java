@@ -443,16 +443,20 @@ public abstract class CategoryMethodBase extends MethodBase {
 
       final List<Header> headers = new ArrayList<>();
       headers.add(new BasicHeader("Accept", "application/json"));
+      
+      String urlSuffix = "categories/" +
+              "?q=" + URLEncoder.encode(q, "UTF-8");
+      
+      if (pfx != null) {
+        urlSuffix += "&pfx=" + URLEncoder.encode(pfx, "UTF-8");
+      }
 
       for (final String server: servers) {
         final String urlStr = 
-                endingSlash(server) +
-                        "categories/" +
-                        "?q=" + URLEncoder.encode(q, "UTF-8") +
-                        "&pfx=" + URLEncoder.encode(pfx, "UTF-8");
+                endingSlash(server) + urlSuffix;
 
         final int status = cl.sendRequest("GET", urlStr, headers);
-        if ((status % 100) != 2) {
+        if ((status / 100) != 2) {
           continue; // Try elsewhere
         }
 

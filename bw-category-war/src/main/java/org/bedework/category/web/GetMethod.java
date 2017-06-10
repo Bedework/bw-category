@@ -145,6 +145,12 @@ public class GetMethod extends CategoryMethodBase {
     try {
       final boolean primary = rutil.present("primary");
       final String q = rutil.getReqPar("q");
+      
+      if (q == null) {
+        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        return;
+      }
+      
       final String pfx = rutil.getReqPar("pfx");
 
       final List<SearchResultItem> sris;
