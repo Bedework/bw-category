@@ -17,7 +17,7 @@
     <orderEntry type="library" name="Maven: org.bedework:bw-ws-tzsvr:4.0.4" level="project" />
     <orderEntry type="library" name="Maven: org.bedework:bw-ws-calws-soap:4.0.4" level="project" />
     <orderEntry type="library" name="Maven: jtidy:jtidy:4aug2000r7-dev" level="project" />
-    <orderEntry type="library" name="Maven: org.bedework:bw-util-elasticsearch:4.0.6-SNAPSHOT" level="project" />
+    <orderEntry type="module" module-name="bw-util-elasticsearch" />
     <orderEntry type="module" module-name="bw-util-indexing" />
     <orderEntry type="module" module-name="bw-util-timezones" />
     <orderEntry type="module" module-name="bw-util-caching" />
