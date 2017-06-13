@@ -184,7 +184,7 @@ public class CategoryIndex extends Logged {
       
       qb.should(new MultiMatchQueryBuilder(val, 
                                            "href.autocathref")
-                        .field("last.matcher", 30));
+                        .field("last.matcher", 5));
 
       final FunctionScoreQueryBuilder fsqb = new FunctionScoreQueryBuilder(
               qb);
