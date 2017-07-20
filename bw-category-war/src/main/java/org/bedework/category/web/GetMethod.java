@@ -19,11 +19,10 @@
 package org.bedework.category.web;
 
 import org.bedework.category.common.Category;
-import org.bedework.category.common.SearchResultItem;
+import org.bedework.category.common.SearchResult;
 import org.bedework.util.misc.Util;
 import org.bedework.util.servlet.ReqUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -144,6 +143,9 @@ public class GetMethod extends CategoryMethodBase {
 
     try {
       final boolean primary = rutil.present("primary");
+      final int from = rutil.getIntReqPar("from", 0);
+      final int ct = rutil.getIntReqPar("ct", 30);
+      final boolean href = rutil.getBooleanReqPar("href", false);
       final String q = rutil.getReqPar("q");
       
       if (q == null) {
@@ -153,11 +155,11 @@ public class GetMethod extends CategoryMethodBase {
       
       final String pfx = rutil.getReqPar("pfx");
 
-      final List<SearchResultItem> sris;
+      final SearchResult sr;
       if (primary) {
-        sris = findRemote(q, pfx);
+        sr = findRemote(q, pfx, href, from, ct);
       } else {
-        sris = getIndex().find(q, pfx, 30);
+        sr = getIndex().find(q, pfx, href, from, ct);
       }
 
       final String accept = req.getHeader("Accept");
@@ -167,28 +169,12 @@ public class GetMethod extends CategoryMethodBase {
                       ((accept != null) &&
                                accept.contains("text/html"));
 
-      final boolean href = rutil.present("href");
-
       if (html) {
-        writeHtml(sris, resp, href);
+        writeHtml(sr, resp, href);
         return;
       }
 
-      if (!href) {
-        writeJson(sris, resp);
-        return;
-      }
-      
-      final List<SearchResultItem> res = new ArrayList<>();
-        
-      for (final SearchResultItem sri: sris) {
-        final Category scat = sri.getCategory();
-          
-        res.add(new SearchResultItem(scat.getHref(), 
-                                     sri.getScore()));
-      }
-
-      writeJson(res, resp);
+      writeJson(sr, resp);
     } catch (final ServletException se) {
       throw se;
     } catch(final Throwable t) {

@@ -24,9 +24,10 @@ import org.bedework.util.elasticsearch.EntityBuilderBase;
 import org.bedework.util.indexing.IndexException;
 import org.bedework.util.misc.Util;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * User: mike Date: 3/14/16 Time: 16:31
@@ -61,14 +62,15 @@ public class EntityBuilder extends EntityBuilderBase {
     return c;
   }
 
-  private List<CategoryChild> makeCatChildren() throws IndexException {
+  private Set<CategoryChild> makeCatChildren()
+          throws IndexException {
     final List<Object> vals = getFieldValues("children");
 
     if (Util.isEmpty(vals)) {
       return null;
     }
 
-    final List<CategoryChild> ccs = new ArrayList<>();
+    final Set<CategoryChild> ccs = new TreeSet<>();
 
     for (final Object o: vals) {
       try {

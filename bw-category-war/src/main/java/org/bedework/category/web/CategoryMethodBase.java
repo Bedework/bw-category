@@ -21,6 +21,7 @@ package org.bedework.category.web;
 import org.bedework.category.common.Category;
 import org.bedework.category.common.CategoryConfigProperties;
 import org.bedework.category.common.CategoryException;
+import org.bedework.category.common.SearchResult;
 import org.bedework.category.common.SearchResultItem;
 import org.bedework.category.impl.CategoryChildImpl;
 import org.bedework.category.impl.CategoryIndex;
@@ -32,7 +33,6 @@ import org.bedework.util.servlet.MethodBase;
 import org.bedework.util.xml.XmlEmit;
 import org.bedework.util.xml.XmlEmit.NameSpace;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.http.Header;
@@ -286,7 +286,7 @@ public abstract class CategoryMethodBase extends MethodBase {
     }
   }
 
-  protected void writeHtml(final List<SearchResultItem> sris,
+  protected void writeHtml(final SearchResult sr,
                            final HttpServletResponse resp,
                            final boolean hrefOnly) throws ServletException {
     try {
@@ -302,21 +302,20 @@ public abstract class CategoryMethodBase extends MethodBase {
       xml.closeTag(head);
 
       xml.openTag(body);
-      xml.property(para, "Found: " + sris.size());
+      xml.property(para, "Found: " + sr.getFound());
+      xml.property(para, "Returned: " + sr.getItems().size());
 
       if (hrefOnly) {
         xml.openTag(ul);
       }
       
-      for (final SearchResultItem sri: sris) {
-        final Category cat = sri.getCategory();
-        
+      for (final SearchResultItem sri: sr.getItems()) {
         if (!hrefOnly) {
-          writeHtmlCat(xml, cat);
+          writeHtmlCat(xml, sri.getCategory());
         } else {
           xml.openTag(li);
-          xml.openTag(address, "href", catHref(cat.getHref()) + "?format=html");
-          xml.value(catLabel(cat));
+          xml.openTag(address, "href", catHref(sri.getHref()) + "?format=html");
+          xml.value(sri.getHref() + " (" + sri.getScore() + ")");
           xml.closeTag(address);
           xml.closeTag(li);
         }
@@ -429,8 +428,11 @@ public abstract class CategoryMethodBase extends MethodBase {
     }
   }
 
-  protected List<SearchResultItem> findRemote(final String q,
-                                              final String pfx)
+  protected SearchResult findRemote(final String q,
+                                    final String pfx,
+                                    final boolean href,
+                                    final int from,
+                                    final int size)
           throws ServletException {
     final List<String> servers = config.getServerList();
 
@@ -445,7 +447,10 @@ public abstract class CategoryMethodBase extends MethodBase {
       headers.add(new BasicHeader("Accept", "application/json"));
       
       String urlSuffix = "categories/" +
-              "?q=" + URLEncoder.encode(q, "UTF-8");
+              "?from=" + from +
+              "&ct=" + size +
+              "&href=" + href +
+              "&q=" + URLEncoder.encode(q, "UTF-8");
       
       if (pfx != null) {
         urlSuffix += "&pfx=" + URLEncoder.encode(pfx, "UTF-8");
@@ -462,7 +467,7 @@ public abstract class CategoryMethodBase extends MethodBase {
 
         return getMapper()
                 .readValue(cl.getResponseBodyAsStream(),
-                           new TypeReference<List<SearchResultItem>>(){});
+                           SearchResult.class);
       }
 
       // Nowhere left to go

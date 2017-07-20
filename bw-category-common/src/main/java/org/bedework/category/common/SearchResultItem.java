@@ -24,12 +24,22 @@ import org.bedework.util.misc.ToString;
  * User: mike Date: 3/9/16 Time: 23:54
  */
 
-public class SearchResultItem {
+public class SearchResultItem extends Response 
+        implements Comparable<SearchResultItem> {
   private Category category;
   private String href;
   private float score;
 
   public SearchResultItem() {
+  }
+
+  public SearchResultItem(final Status status) {
+    super(status);
+  }
+
+  public SearchResultItem(final Status status,
+                          final String message) {
+    super(status, message);
   }
 
   public SearchResultItem(final String href, final float score) {
@@ -65,14 +75,42 @@ public class SearchResultItem {
   public void setScore(final float val) {
     score = val;
   }
-  
-  public String toString() {
-    final ToString ts = new ToString(this);
-    
+
+  public void toStringSegment(final ToString ts) {
+    super.toStringSegment(ts);
+
     ts.append("category", getCategory());
     ts.append("href", getHref());
     ts.append("score", getScore());
+  }
+
+  @Override
+  public int compareTo(final SearchResultItem that) {
+    // TreeSet sorts by increasing order - we want highest first
+    if (this == that) {
+      return 0;
+    }
     
-    return toString();
+    if (getScore() < that.getScore()) {
+      return 1;
+    }
+
+    if (getScore() > that.getScore()) {
+      return -1;
+    }
+
+    if (href != null) {
+      return -getHref().compareTo(that.getHref());
+    }
+
+    if (getCategory() == null) {
+      if (that.getCategory() != null) {
+        return 1;
+      }
+      
+      return 0;
+    }
+    
+    return -getCategory().compareTo(that.getCategory());
   }
 } 

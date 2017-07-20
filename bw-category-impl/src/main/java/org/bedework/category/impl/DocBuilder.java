@@ -28,10 +28,10 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 
-import static org.bedework.category.common.Category.*;
+import static org.bedework.category.common.Category.CategoryChild;
+import static org.bedework.category.common.Category.docType;
 
 /** Build documents for ElasticSearch
  *
@@ -193,7 +193,7 @@ public class DocBuilder {
    *                   private methods
    * ======================================================================== */
 
-  private void makeCatChildren(final List<CategoryChild> vals) throws CategoryException {
+  private void makeCatChildren(final Set<CategoryChild> vals) throws CategoryException {
     try {
       if (Util.isEmpty(vals)) {
         return;

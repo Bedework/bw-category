@@ -20,14 +20,15 @@ package org.bedework.category.common;
 
 import org.bedework.util.misc.ToString;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /** Representation of category. Based on dmoz topic.
  *
  * User: mike
  */
-public class Category {
+public class Category implements Comparable<Category> {
   public final static String nsabbrevDmoz = "dmoz";
 
   public final static String docType = "category";
@@ -45,7 +46,8 @@ public class Category {
   private String title;
   private String description;
 
-  public interface CategoryChild {
+  public interface CategoryChild 
+          extends Comparable<CategoryChild> {
     /**
      * @return 0, 1 or 2 - dmoz puts 2 at top
      */
@@ -54,7 +56,7 @@ public class Category {
     String getHref();
   }
 
-  private List<CategoryChild> children = new ArrayList<>();
+  private Set<CategoryChild> children = new TreeSet<>();
 
   private int sort;
   
@@ -167,16 +169,25 @@ public class Category {
    * @return list of child hrefs - each prefixed by 0: 1: 2: corresponding to
    *  narrow, narrow1, narrow2
    */
-  public List<CategoryChild> getChildren() {
+  public Set<CategoryChild> getChildren() {
     return children;
   }
 
-  public void setChildren(final List<CategoryChild> val) {
+  public void setChildren(final Set<CategoryChild> val) {
     children = val;
   }
 
   public void addChild(final CategoryChild val) {
     children.add(val);
+  }
+
+  @Override
+  public int compareTo(final Category that) {
+    if (this == that) {
+      return 0;
+    }
+
+    return getHref().compareTo(that.getHref());
   }
 
   public String toString() {

@@ -21,6 +21,7 @@ package org.bedework.category.impl;
 import org.bedework.category.common.Category;
 import org.bedework.category.common.CategoryConfigProperties;
 import org.bedework.category.common.CategoryException;
+import org.bedework.category.common.SearchResult;
 import org.bedework.category.common.SearchResultItem;
 import org.bedework.util.elasticsearch.EsDocInfo;
 import org.bedework.util.elasticsearch.EsUtil;
@@ -55,6 +56,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import static org.bedework.category.common.Response.Status.failed;
 
 /**
  * User: mike Date: 3/13/16 Time: 16:11
@@ -168,33 +171,110 @@ public class CategoryIndex extends Logged {
     }
   }
   
-  public List<SearchResultItem> find(final String val,
-                                     final String prefix,
-                                     final int size) throws CategoryException {
+  private QueryBuilder qtype1(final String val,
+                              final String prefix,
+                              final String fuzziness) {
+    final BoolQueryBuilder qb = new BoolQueryBuilder();
+    if (prefix != null) {
+      qb.must(new PrefixQueryBuilder("href", prefix));
+    }
+
+    final MultiMatchQueryBuilder mmqb =
+            new MultiMatchQueryBuilder(val,
+                                       "href.autocathref")
+                    .field("last.matcher", 5);
+
+    if (fuzziness != null) {
+      mmqb.fuzziness(fuzziness);
+    }
+
+    qb.should(mmqb);
+
+    final FunctionScoreQueryBuilder fsqb =
+            new FunctionScoreQueryBuilder(
+                    qb);
+            
+    /* Higher score for shorter path length */
+    fsqb.add(ScoreFunctionBuilders
+                     .fieldValueFactorFunction("hrefDepth")
+                     .factor(10)
+                     .modifier(FieldValueFactorFunction.Modifier.RECIPROCAL));
+    
+    return fsqb;
+  }
+
+  private QueryBuilder qtype2(final String val,
+                              final String prefix,
+                              final String fuzziness) {
+    final BoolQueryBuilder qb = new BoolQueryBuilder();
+    if (prefix != null) {
+      qb.must(new PrefixQueryBuilder("href", prefix));
+    }
+
+    qb.mustNot(new PrefixQueryBuilder("href", "/dmoz/World"));
+
+    final MultiMatchQueryBuilder mmqb =
+            new MultiMatchQueryBuilder(val,
+                                       "href.autocathref")
+                    .field("last.matcher", 5)
+            .type(MultiMatchQueryBuilder.Type.MOST_FIELDS);
+
+    if (fuzziness != null) {
+      mmqb.fuzziness(fuzziness);
+    }
+
+    qb.should(mmqb);
+
+    return qb;
+  }
+  
+  public SearchResult find(final String val,
+                           final String prefix,
+                           final boolean hrefs,
+                           final int from,
+                           final int size) {
     try {
+      if (val == null) {
+        return new SearchResult(failed, "Must supply query");
+      }
+
       final Client cl = getEsUtil().getClient();
 
       final SearchRequestBuilder srb = cl
               .prepareSearch(conf.getIndexName());
 
-      final BoolQueryBuilder qb = new BoolQueryBuilder();
-      if (prefix != null) {
-        qb.must(new PrefixQueryBuilder("href", prefix));
+      String qstring;
+      final int qtype;
+      if (val.startsWith("!qt1 ")) {
+        qtype = 1;
+        qstring = val.substring(5);
+      } else if (val.startsWith("!qt2 ")) {
+        qtype = 1;
+        qstring = val.substring(5);
+      } else {
+        qtype = 2;
+        qstring = val;
       }
+
+      final String fuzziness;
+      if (qstring.startsWith("* ")) {
+        fuzziness = "AUTO";
+        qstring = qstring.substring(2);
+      } else {
+        fuzziness = null;
+      }
+
+      final QueryBuilder qb;
       
-      qb.should(new MultiMatchQueryBuilder(val, 
-                                           "href.autocathref")
-                        .field("last.matcher", 5));
+      if (qtype == 1) {
+        qb = qtype1(qstring, prefix, fuzziness);
+      } else {
+        qb = qtype2(qstring, prefix, fuzziness);
+      }
 
-      final FunctionScoreQueryBuilder fsqb = new FunctionScoreQueryBuilder(
-              qb);
-            
-      /* Higher score for shorter path length */
-      fsqb.add(ScoreFunctionBuilders.fieldValueFactorFunction("hrefDepth").
-              factor(10).
-              modifier(FieldValueFactorFunction.Modifier.RECIPROCAL));
-
-      srb.setQuery(fsqb);
+      srb.setQuery(qb)
+         .setFrom(from)
+         .setSize(size);
 
       if (debug) {
         debug("find: about to query " + srb);
@@ -206,9 +286,10 @@ public class CategoryIndex extends Logged {
       //TODO
 //    }
 
+      final long found = resp.getHits().getTotalHits();
       if (debug) {
         debug("find: returned status " + resp.status() +
-                      " found: " + resp.getHits().getTotalHits());
+                      " found: " + found);
       }
       int sz = 0;
       final SearchHits hits = resp.getHits();
@@ -217,18 +298,20 @@ public class CategoryIndex extends Logged {
         sz = hits.hits().length;
       }
 
-      final List<SearchResultItem> sris = new ArrayList<>(sz);
-
       //Break condition: No hits are returned
       if (sz == 0) {
-        return sris;
+        return new SearchResult();
       }
+
+      final SearchResult sr = new SearchResult(found);
 
       for (final SearchHit hit : hits) {
         final String kval = hit.getId();
 
         if (kval == null) {
-          throw new CategoryException("org.bedework.index.noitemkey");
+          sr.addItem(new SearchResultItem(failed, 
+                                          "org.bedework.index.noitemkey"));
+          continue;
         }
 
         final Map<String, SearchHitField> fields = hit.fields();
@@ -239,12 +322,20 @@ public class CategoryIndex extends Logged {
         final Category cat = new EntityBuilder(hit.getSource(),
                                                0).makeCategory();
 
-        sris.add(new SearchResultItem(cat, hit.score()));
+        if (hrefs) {
+          sr.addItem(new SearchResultItem(cat.getHref(),
+                                          hit.score()));
+        } else {
+          sr.addItem(new SearchResultItem(cat, hit.score()));
+        }
       }
 
-      return sris;
+      return sr;
     } catch (final Throwable t) {
-      throw new CategoryException(t);
+      if (debug) {
+        error(t);
+      }
+      return new SearchResult(failed, t.getLocalizedMessage());
     }
   }
   
