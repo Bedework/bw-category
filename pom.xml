@@ -13,7 +13,6 @@
 		<maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
 		<maven.source.plugin.version>2.1.2</maven.source.plugin.version>
 		<!-- Bedework Versions -->
-		<bw-ws.version>4.0.4</bw-ws.version>
 		<bw-util.version>4.0.14-SNAPSHOT</bw-util.version>
 		<bw-access.version>4.0.1</bw-access.version>
 
@@ -153,17 +152,6 @@
         <artifactId>bw-util-timezones</artifactId>
         <version>${bw-util.version}</version>
       </dependency>
-			<!-- Bedework: Web Services -->
-			<dependency>
-				<groupId>org.bedework</groupId>
-				<artifactId>bw-ws-synchws</artifactId>
-				<version>${bw-ws.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.bedework</groupId>
-				<artifactId>bw-ws-exchangews</artifactId>
-				<version>${bw-ws.version}</version>
-			</dependency>
 			<!-- Third Party Libraries -->
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>

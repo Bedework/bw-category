@@ -17,40 +17,12 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>bw-category-common</artifactId>
 			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.apache.derby</groupId>
-					<artifactId>derbynet</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.bedework</groupId>
-					<artifactId>bw-ical4j-cl</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.bedework</groupId>
-					<artifactId>bw-ws-calws-soap</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.bedework</groupId>
-					<artifactId>bw-ws-exchangews</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.bedework</groupId>
-					<artifactId>bw-ws-icalendar</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.bedework</groupId>
-					<artifactId>bw-ws-synchws</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.bedework</groupId>
-					<artifactId>bw-ws-tzsvr</artifactId>
-				</exclusion>
-			</exclusions>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
 		</dependency>
     <dependency>
       <groupId>org.bedework</groupId>
