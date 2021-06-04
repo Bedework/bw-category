@@ -21,7 +21,7 @@
     <ical4j.version>2.0.3</ical4j.version>
     
 		<!-- Third Party Library Versions -->
-    <apache-http.version>4.2.2</apache-http.version>
+    <apache-http.version>4.5.13</apache-http.version>
     <asm.version>3.2</asm.version>
     <asm-attrs.version>2.2.3</asm-attrs.version>
 		<commons-codec.version>1.5</commons-codec.version>
