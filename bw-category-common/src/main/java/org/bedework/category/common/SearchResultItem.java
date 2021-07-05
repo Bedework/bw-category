@@ -19,12 +19,13 @@
 package org.bedework.category.common;
 
 import org.bedework.util.misc.ToString;
+import org.bedework.util.misc.response.Response;
 
 /**
  * User: mike Date: 3/9/16 Time: 23:54
  */
 
-public class SearchResultItem extends Response 
+public class SearchResultItem extends Response
         implements Comparable<SearchResultItem> {
   private Category category;
   private String href;
@@ -34,12 +35,13 @@ public class SearchResultItem extends Response
   }
 
   public SearchResultItem(final Status status) {
-    super(status);
+    setStatus(status);
   }
 
   public SearchResultItem(final Status status,
                           final String message) {
-    super(status, message);
+    setStatus(status);
+    setMessage(message);
   }
 
   public SearchResultItem(final String href, final float score) {

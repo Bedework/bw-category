@@ -14,21 +14,10 @@
   <dependencies>
     <dependency>
       <groupId>org.bedework</groupId>
-      <artifactId>bw-util-config</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.bedework</groupId>
-      <artifactId>bw-util-elasticsearch</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.bedework</groupId>
-      <artifactId>bw-util-jmx</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.bedework</groupId>
       <artifactId>bw-category-common</artifactId>
       <version>${project.version}</version>
     </dependency>
+
     <dependency>
       <groupId>org.bedework</groupId>
       <artifactId>bw-category-impl</artifactId>
@@ -36,22 +25,28 @@
     </dependency>
 
     <dependency>
-      <groupId>org.elasticsearch</groupId>
-      <artifactId>elasticsearch</artifactId>
+      <groupId>org.bedework</groupId>
+      <artifactId>bw-util-config</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.elasticsearch</groupId>
-      <artifactId>elasticsearch</artifactId>
-      <version>1.5.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.elasticsearch</groupId>
-      <artifactId>elasticsearch</artifactId>
-      <version>1.5.2</version>
-    </dependency>
+
     <dependency>
       <groupId>org.bedework</groupId>
       <artifactId>bw-util-elasticsearch</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bedework</groupId>
+      <artifactId>bw-util-jmx</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bedework</groupId>
+      <artifactId>bw-util-misc</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.elasticsearch</groupId>
+      <artifactId>elasticsearch</artifactId>
     </dependency>
   </dependencies>
 </project>

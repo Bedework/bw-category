@@ -19,17 +19,19 @@
 package org.bedework.category.web;
 
 import org.bedework.category.service.Categories;
+import org.bedework.category.service.CategoryConfigPropertiesImpl;
 import org.bedework.util.elasticsearch.EsCtl;
 import org.bedework.util.elasticsearch.EsCtlMBean;
 import org.bedework.util.jmx.ConfBase;
 import org.bedework.util.jmx.MBeanUtil;
+import org.bedework.util.logging.BwLogger;
 import org.bedework.util.servlet.MethodBase;
 import org.bedework.util.servlet.ServletBase;
 
 import javax.management.ObjectName;
 import javax.servlet.ServletException;
 
-import static org.bedework.util.servlet.MethodBase.*;
+import static org.bedework.util.servlet.MethodBase.MethodInfo;
 
 /** This servlet handles the categories reuests and respondes.
  *
@@ -66,8 +68,8 @@ public class CategoryServlet extends ServletBase {
   protected void initMethodBase(final MethodBase mb,
                                 final ConfBase conf,
                                 final boolean dumpContent) throws ServletException {
-    Configurator cfg = (Configurator)conf;
-    CategoryMethodBase cmb = (CategoryMethodBase)mb;
+    final Configurator cfg = (Configurator)conf;
+    final CategoryMethodBase cmb = (CategoryMethodBase)mb;
 
     try {
       cmb.init(getEsCtl(), cfg.categories.getConfig(),
@@ -80,7 +82,7 @@ public class CategoryServlet extends ServletBase {
   /**
    *
    * @return Mbean to configure our local copy of EsUtil
-   * @throws Throwable
+   * @throws Throwable on fatal error
    */
   private EsCtlMBean getEsCtl() throws Throwable {
     if (esCtl != null) {
@@ -97,7 +99,8 @@ public class CategoryServlet extends ServletBase {
    *                         JMX support
    */
 
-  static class Configurator extends ConfBase {
+  static class Configurator
+          extends ConfBase<CategoryConfigPropertiesImpl<?>> {
     Categories categories;
     EsCtl esCtl;
 
@@ -127,7 +130,7 @@ public class CategoryServlet extends ServletBase {
                  esCtl);
 
         esCtl.loadConfig();
-      } catch (Throwable t){
+      } catch (final Throwable t){
         t.printStackTrace();
       }
     }
@@ -137,16 +140,30 @@ public class CategoryServlet extends ServletBase {
       try {
 //        categories.stop();
         getManagementContext().stop();
-      } catch (Throwable t){
+      } catch (final Throwable t){
         t.printStackTrace();
       }
     }
   }
   
-  private static Configurator conf = new Configurator();
+  private static final Configurator conf = new Configurator();
   
-  protected ConfBase getConfigurator() {
+  protected ConfBase<?> getConfigurator() {
     return conf;
   }
 
+  /* ==============================================================
+   *                   Logged methods
+   * ============================================================== */
+
+  private final BwLogger logger = new BwLogger();
+
+  @Override
+  public BwLogger getLogger() {
+    if ((logger.getLoggedClass() == null) && (logger.getLoggedName() == null)) {
+      logger.setLoggedClass(getClass());
+    }
+
+    return logger;
+  }
 }

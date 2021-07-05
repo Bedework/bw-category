@@ -27,17 +27,21 @@ import org.bedework.util.elasticsearch.EsDocInfo;
 import org.bedework.util.elasticsearch.EsUtil;
 import org.bedework.util.elasticsearch.IndexProperties;
 import org.bedework.util.jmx.InfoLines;
-import org.bedework.util.misc.Logged;
+import org.bedework.util.logging.BwLogger;
+import org.bedework.util.logging.Logged;
+import org.bedework.util.misc.response.Response;
 
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.client.Client;
+import org.elasticsearch.action.search.SearchScrollRequest;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.document.DocumentField;
 import org.elasticsearch.common.lucene.search.function.FieldValueFactorFunction;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -47,9 +51,10 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
+import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,12 +62,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.bedework.category.common.Response.Status.failed;
+import static org.bedework.util.misc.response.Response.Status.failed;
 
 /**
  * User: mike Date: 3/13/16 Time: 16:11
  */
-public class CategoryIndex extends Logged {
+public class CategoryIndex implements Logged {
   private final IndexProperties idxprops;
   private final CategoryConfigProperties conf;
   
@@ -150,7 +155,7 @@ public class CategoryIndex extends Logged {
   }
   
   public Category getCategory(final String href) throws CategoryException {
-    if (debug) {
+    if (debug()) {
       debug("getCategory: target=" + conf.getIndexName() + " href=" + href);
     }
 
@@ -190,17 +195,13 @@ public class CategoryIndex extends Logged {
 
     qb.should(mmqb);
 
-    final FunctionScoreQueryBuilder fsqb =
-            new FunctionScoreQueryBuilder(
-                    qb);
-            
     /* Higher score for shorter path length */
-    fsqb.add(ScoreFunctionBuilders
-                     .fieldValueFactorFunction("hrefDepth")
-                     .factor(10)
-                     .modifier(FieldValueFactorFunction.Modifier.RECIPROCAL));
-    
-    return fsqb;
+
+    return new FunctionScoreQueryBuilder(
+            qb, ScoreFunctionBuilders
+            .fieldValueFactorFunction("hrefDepth")
+            .factor(10)
+            .modifier(FieldValueFactorFunction.Modifier.RECIPROCAL));
   }
 
   private QueryBuilder qtype2(final String val,
@@ -235,13 +236,11 @@ public class CategoryIndex extends Logged {
                            final int size) {
     try {
       if (val == null) {
-        return new SearchResult(failed, "Must supply query");
+        return Response.notOk(new SearchResult(),
+                              failed, "Must supply query");
       }
 
-      final Client cl = getEsUtil().getClient();
-
-      final SearchRequestBuilder srb = cl
-              .prepareSearch(conf.getIndexName());
+      final RestHighLevelClient cl = getEsUtil().getClient();
 
       String qstring;
       final int qtype;
@@ -272,30 +271,37 @@ public class CategoryIndex extends Logged {
         qb = qtype2(qstring, prefix, fuzziness);
       }
 
-      srb.setQuery(qb)
-         .setFrom(from)
-         .setSize(size);
+      final SearchSourceBuilder ssb =
+              new SearchSourceBuilder()
+                      .size(size)
+                      .query(qb);
 
-      if (debug) {
-        debug("find: about to query " + srb);
+      final SearchRequest sreq = new SearchRequest(conf.getIndexName())
+              .source(ssb);
+
+      final SearchResponse resp;
+      try {
+        resp = getClient().search(sreq, RequestOptions.DEFAULT);
+      } catch (final Throwable t) {
+        return Response.error(new SearchResult(), t);
       }
-
-      final SearchResponse resp = srb.execute().actionGet();
 
 //    if (resp.status() != RestStatus.OK) {
       //TODO
 //    }
 
-      final long found = resp.getHits().getTotalHits();
-      if (debug) {
+      final long found =
+              resp.getHits().getTotalHits().value;
+      if (debug()) {
         debug("find: returned status " + resp.status() +
                       " found: " + found);
       }
+
       int sz = 0;
       final SearchHits hits = resp.getHits();
 
       if (hits.getHits() != null) {
-        sz = hits.hits().length;
+        sz = hits.getHits().length;
       }
 
       //Break condition: No hits are returned
@@ -314,28 +320,29 @@ public class CategoryIndex extends Logged {
           continue;
         }
 
-        final Map<String, SearchHitField> fields = hit.fields();
+        final Map<String, DocumentField> fields = hit.getFields();
 
-        String fldval = null;
-        String href = null;
+        final String fldval = null;
+        final String href = null;
 
-        final Category cat = new EntityBuilder(hit.getSource(),
+        final Category cat = new EntityBuilder(hit.getSourceAsMap(),
                                                0).makeCategory();
 
         if (hrefs) {
           sr.addItem(new SearchResultItem(cat.getHref(),
-                                          hit.score()));
+                                          hit.getScore()));
         } else {
-          sr.addItem(new SearchResultItem(cat, hit.score()));
+          sr.addItem(new SearchResultItem(cat, hit.getScore()));
         }
       }
 
       return sr;
     } catch (final Throwable t) {
-      if (debug) {
+      if (debug()) {
         error(t);
       }
-      return new SearchResult(failed, t.getLocalizedMessage());
+
+      return Response.notOk(new SearchResult(), failed, t.getLocalizedMessage());
     }
   }
   
@@ -376,68 +383,95 @@ public class CategoryIndex extends Logged {
     final TimeValue tv = new TimeValue(timeoutMillis);
     final int batchSize = 100;
 
+    final RestHighLevelClient cl = getClient();
+
+    final BulkListener listener = new BulkListener();
+
+    final BulkProcessor.Builder builder = BulkProcessor.builder(
+            (request, bulkListener) ->
+                    cl.bulkAsync(request, RequestOptions.DEFAULT,
+                                 bulkListener),
+            listener);
+
     final BulkProcessor bulkProcessor =
-            BulkProcessor.builder(getClient(),
-                                  new BulkListener())
-                         .setBulkActions(batchSize)
-                         .setConcurrentRequests(3)
-                         .setFlushInterval(tv)
-                         .build();
+            builder.setBulkActions(batchSize)
+                   .setConcurrentRequests(3)
+                   .setFlushInterval(tv)
+                   .build();
 
-    SearchResponse scrollResp = getClient().prepareSearch(conf.getIndexName())
-                                           .setSearchType(SearchType.SCAN)
-                                           .setScroll(tv)
-                                           .setQuery(qb)
-                                           .setSize(batchSize) //batchsize hits per shard will be returned for each scroll
-                                           .execute()
-                                           .actionGet(); 
+    final SearchSourceBuilder ssb =
+            new SearchSourceBuilder()
+                    .size(batchSize)
+                    .query(qb);
 
-    //Scroll until no hits are returned
-    while (true) {
-      for (final SearchHit hit : scrollResp.getHits().getHits()) {
-        processed++;
-        if ((processed % 500) == 0) {
-          info("Processed: " + processed);
-        }
-
-        final Category cat = makeCat(hit);
-        if (cat == null) {
-          warn("Unable to build category " + hit.sourceAsString());
-          continue;
-        }
-
-        try {
-          final EsDocInfo di = makeDoc(cat);
-          
-          final IndexRequest request =
-                  new IndexRequest(toIndex, hit.type(), di.getId());
-
-          request.source(di.getSource());
-          bulkProcessor.add(request);
-        } catch (final CategoryException pe) {
-          warn("Unable to build document " + hit.sourceAsString());
-          continue;
-        }
-      }
-      scrollResp = getClient().prepareSearchScroll(scrollResp.getScrollId()).
-                                      setScroll(tv).
-                                      execute().
-                                      actionGet();
-      if (scrollResp.getHits().getHits().length == 0) {
-        break;
-      }
-    }
+    final SearchRequest sr = new SearchRequest(conf.getIndexName())
+            .source(ssb)
+            .scroll(tv);
 
     try {
-      bulkProcessor.awaitClose(10, TimeUnit.MINUTES);
-    } catch (final InterruptedException e) {
-      warn("Final bulk close was interrupted. Records may be missing");
+      SearchResponse scrollResp = cl.search(sr, RequestOptions.DEFAULT);
+
+      if (scrollResp.status() != RestStatus.OK) {
+        if (debug()) {
+          debug("Search returned status " + scrollResp.status());
+        }
+      }
+
+      //Scroll until no hits are returned
+      while (true) {
+        for (final SearchHit hit : scrollResp.getHits().getHits()) {
+          processed++;
+          if ((processed % 500) == 0) {
+            info("Processed: " + processed);
+          }
+
+          final Category cat = makeCat(hit);
+          if (cat == null) {
+            warn("Unable to build category " + hit.getSourceAsString());
+            continue;
+          }
+
+          try {
+            final EsDocInfo di = makeDoc(cat);
+          
+            final IndexRequest request =
+                    new IndexRequest(toIndex);
+
+            request.id(di.getId());
+
+            request.source(di.getSource());
+            bulkProcessor.add(request);
+          } catch (final CategoryException pe) {
+            warn("Unable to build document " + hit.getSourceAsString());
+            continue;
+          }
+        }
+
+        final SearchScrollRequest scrollRequest =
+                new SearchScrollRequest(scrollResp.getScrollId());
+        scrollRequest.scroll(tv);
+        scrollResp = getClient().scroll(scrollRequest,
+                                        RequestOptions.DEFAULT);
+
+        //Break condition: No hits are returned
+        if (scrollResp.getHits().getHits().length == 0) {
+          break;
+        }
+      }
+
+      try {
+        bulkProcessor.awaitClose(10, TimeUnit.MINUTES);
+      } catch (final InterruptedException e) {
+        warn("Final bulk close was interrupted. Records may be missing");
+      }
+    } catch (final Throwable t) {
+      error(t);
     }
   }
   
   private Category makeCat(final SearchHit hit) throws CategoryException {
     try {
-      return new EntityBuilder(hit.getSource(),
+      return new EntityBuilder(hit.getSourceAsMap(),
                                0).makeCategory();
     } catch (final Throwable t) {
       throw new CategoryException(t);
@@ -488,14 +522,13 @@ public class CategoryIndex extends Logged {
     }
   }
 
-  private Client getClient() throws CategoryException {
+  private RestHighLevelClient getClient() throws CategoryException {
     try {
       return getEsUtil().getClient();
     } catch (final Throwable t) {
       throw new CategoryException(t);
     }
   }
-
 
   private String elapsed(final long start) {
     final long millis = System.currentTimeMillis() - start;
@@ -517,5 +550,20 @@ public class CategoryIndex extends Logged {
     }
 
     return String.valueOf(val);
+  }
+
+  /* ==============================================================
+   *                   Logged methods
+   * ============================================================== */
+
+  private final BwLogger logger = new BwLogger();
+
+  @Override
+  public BwLogger getLogger() {
+    if ((logger.getLoggedClass() == null) && (logger.getLoggedName() == null)) {
+      logger.setLoggedClass(getClass());
+    }
+
+    return logger;
   }
 }

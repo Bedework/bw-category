@@ -18,6 +18,7 @@
 */
 package org.bedework.category.web;
 
+import org.bedework.category.common.CatUtil;
 import org.bedework.category.common.Category;
 import org.bedework.category.common.CategoryConfigProperties;
 import org.bedework.category.common.CategoryException;
@@ -27,7 +28,8 @@ import org.bedework.category.impl.CategoryChildImpl;
 import org.bedework.category.impl.CategoryIndex;
 import org.bedework.category.impl.HrefElementImpl;
 import org.bedework.util.elasticsearch.IndexProperties;
-import org.bedework.util.http.BasicHttpClient;
+import org.bedework.util.http.Headers;
+import org.bedework.util.http.HttpUtil;
 import org.bedework.util.misc.Util;
 import org.bedework.util.servlet.MethodBase;
 import org.bedework.util.xml.XmlEmit;
@@ -35,13 +37,17 @@ import org.bedework.util.xml.XmlEmit.NameSpace;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.apache.http.Header;
-import org.apache.http.message.BasicHeader;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -58,7 +64,7 @@ public abstract class CategoryMethodBase extends MethodBase {
   
   private ObjectMapper objectMapper;
   
-  private static BasicHttpClient client; 
+  private static CloseableHttpClient client;
   
   private XmlEmit rdfEmit;
 
@@ -70,7 +76,7 @@ public abstract class CategoryMethodBase extends MethodBase {
   public static final String skosNamespace =
           "http://www.w3.org/2004/02/skos/core#";
   
-  private static NameSpace[] rdfNamespaces = {
+  private static final NameSpace[] rdfNamespaces = {
           new NameSpace(rdfNamespace,
                         "rdf"),
           new NameSpace(skosNamespace,
@@ -141,6 +147,13 @@ public abstract class CategoryMethodBase extends MethodBase {
   /**   */
   public static final QName ul = new QName(null, "ul");
 
+  private static final Headers defaultHeaders;
+
+  static {
+    defaultHeaders = new Headers();
+    defaultHeaders.add("Accept", "application/json");
+  }
+
   @Override
   public void init() throws ServletException {
     
@@ -160,11 +173,9 @@ public abstract class CategoryMethodBase extends MethodBase {
     this.config = config;
     this.dumpContent = dumpContent;
 
-    debug = getLogger().isDebugEnabled();
-    
     if (client == null) {
       try {
-        client = new BasicHttpClient(1000 * 30);
+        client  = HttpClients.createDefault();
       } catch (final Throwable t) {
         error(t);
         throw new ServletException(t);
@@ -193,7 +204,7 @@ public abstract class CategoryMethodBase extends MethodBase {
     return objectMapper;
   }
 
-  private SimpleDateFormat httpDateFormatter =
+  private final SimpleDateFormat httpDateFormatter =
       new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss ");
 
   protected CategoryIndex getIndex() throws CategoryException {
@@ -206,25 +217,20 @@ public abstract class CategoryMethodBase extends MethodBase {
     return index;
   }
 
-  protected XmlEmit getRdfEmit() throws ServletException {
+  protected XmlEmit getRdfEmit() {
     if (rdfEmit != null) {
       return rdfEmit;
     }
 
     rdfEmit = new XmlEmit(false);
 
-    try {
-      for (final NameSpace ns : rdfNamespaces) {
-        rdfEmit.addNs(ns, false);
-      }
-    } catch (Throwable t) {
-      throw new ServletException(t);
-    }
+    Arrays.stream(rdfNamespaces).
+            forEach(ns -> rdfEmit.addNs(ns, false));
 
     return rdfEmit;
   }
 
-  protected XmlEmit getHtmlEmit() throws ServletException {
+  protected XmlEmit getHtmlEmit() {
     if (htmlEmit != null) {
       return htmlEmit;
     }
@@ -236,100 +242,101 @@ public abstract class CategoryMethodBase extends MethodBase {
   
   protected void writeRdf(final Category cat,
                           final HttpServletResponse resp) throws ServletException {
+    final XmlEmit xml = getRdfEmit();
+
     try {
-      XmlEmit xml = getRdfEmit();
-    
       xml.startEmit(resp.getWriter());
-      
-      xml.openTag(rdf);
-
-      xml.openTag(concept, "rdf:about", cat.getHref());
-      
-      xml.property(prefLabel, cat.getTitle());
-      xml.property(definition, cat.getDescription());
-      
-      if (!Util.isEmpty(cat.getChildren())) {
-        for (final Category.CategoryChild ch: cat.getChildren()) {
-          xml.emptyTag(narrower, "rdf:resource", ch.getHref());
-        }
-      }
-      xml.closeTag(concept);
-
-      xml.closeTag(rdf);
-    } catch (Throwable t) {
-      throw new ServletException(t);
+    } catch (final IOException ioe) {
+      throw new RuntimeException(ioe);
     }
+      
+    xml.openTag(rdf);
+
+    xml.openTag(concept, "rdf:about", cat.getHref());
+      
+    xml.property(prefLabel, cat.getTitle());
+    xml.property(definition, cat.getDescription());
+      
+    if (!Util.isEmpty(cat.getChildren())) {
+      cat.getChildren().forEach(
+              ch -> xml.emptyTag(narrower,
+                               "rdf:resource",
+                               ch.getHref()));
+    }
+    xml.closeTag(concept);
+
+    xml.closeTag(rdf);
   }
 
   protected void writeHtml(final Category cat,
                            final HttpServletResponse resp) throws ServletException {
+    resp.setContentType("text/html");
+
+    final XmlEmit xml = getHtmlEmit();
+
     try {
-      resp.setContentType("text/html");
-
-      XmlEmit xml = getHtmlEmit();
-
       xml.startEmit(resp.getWriter());
-
-      xml.openTag(html);
-      xml.openTag(head);
-      xml.property(title, cat.getTitle());
-      xml.closeTag(head);
-
-      xml.openTag(body);
-
-      writeHtmlCat(xml, cat);
-      
-      xml.closeTag(body);
-      xml.closeTag(html);
-    } catch (Throwable t) {
-      throw new ServletException(t);
+    } catch (final IOException ioe) {
+      throw new RuntimeException(ioe);
     }
+
+    xml.openTag(html);
+    xml.openTag(head);
+    xml.property(title, cat.getTitle());
+    xml.closeTag(head);
+
+    xml.openTag(body);
+
+    writeHtmlCat(xml, cat);
+      
+    xml.closeTag(body);
+    xml.closeTag(html);
   }
 
   protected void writeHtml(final SearchResult sr,
                            final HttpServletResponse resp,
                            final boolean hrefOnly) throws ServletException {
-    try {
       resp.setContentType("text/html");
       
-      XmlEmit xml = getHtmlEmit();
+      final XmlEmit xml = getHtmlEmit();
 
+    try {
       xml.startEmit(resp.getWriter());
-
-      xml.openTag(html);
-      xml.openTag(head);
-      xml.property(title, "Search result");
-      xml.closeTag(head);
-
-      xml.openTag(body);
-      xml.property(para, "Found: " + sr.getFound());
-      xml.property(para, "Returned: " + sr.getItems().size());
-
-      if (hrefOnly) {
-        xml.openTag(ul);
-      }
-      
-      for (final SearchResultItem sri: sr.getItems()) {
-        if (!hrefOnly) {
-          writeHtmlCat(xml, sri.getCategory());
-        } else {
-          xml.openTag(li);
-          xml.openTag(address, "href", catHref(sri.getHref()) + "?format=html");
-          xml.value(sri.getHref() + " (" + sri.getScore() + ")");
-          xml.closeTag(address);
-          xml.closeTag(li);
-        }
-      }
-
-      if (hrefOnly) {
-        xml.closeTag(ul);
-      }
-
-      xml.closeTag(body);
-      xml.closeTag(html);
-    } catch (Throwable t) {
-      throw new ServletException(t);
+    } catch (final IOException ioe) {
+      throw new RuntimeException(ioe);
     }
+
+    xml.openTag(html);
+    xml.openTag(head);
+    xml.property(title, "Search result");
+    xml.closeTag(head);
+
+    xml.openTag(body);
+    xml.property(para, "Found: " + sr.getFound());
+    xml.property(para, "Returned: " + sr.getItems().size());
+
+    if (hrefOnly) {
+      xml.openTag(ul);
+    }
+      
+    for (final SearchResultItem sri: sr.getItems()) {
+      if (!hrefOnly) {
+        writeHtmlCat(xml, sri.getCategory());
+      } else {
+        xml.openTag(li);
+        xml.openTag(address, "href", catHref(sri.getHref()) + "?format=html");
+        xml.value(sri.getHref() + " (" + sri.getScore() + ")");
+        xml.closeTag(address);
+        xml.closeTag(li);
+      }
+    }
+
+    if (hrefOnly) {
+      xml.closeTag(ul);
+    }
+
+    xml.closeTag(body);
+    xml.closeTag(html);
   }
 
   protected String catHref(final String href) {
@@ -346,49 +353,45 @@ public abstract class CategoryMethodBase extends MethodBase {
   }
 
   protected void writeHtmlCat(final XmlEmit xml,
-                              final Category cat) throws ServletException {
-    try {
-      xml.openTag(div);
-      xml.property(header2, cat.getTitle());
+                              final Category cat) {
+    xml.openTag(div);
+    xml.property(header2, cat.getTitle());
 
+    xml.openTag(para);
+    xml.openTag(address, "href", catHref(cat.getHref()));
+    xml.value("RDF format");
+    xml.closeTag(address);
+    xml.closeTag(para);
+
+
+    final String parent = parent(cat.getHref());
+      
+    if (parent != null) {
       xml.openTag(para);
-      xml.openTag(address, "href", catHref(cat.getHref()));
-      xml.value("RDF format");
+      xml.openTag(address, "href", catHref(parent) + "?format=html");
+      xml.value("parent");
       xml.closeTag(address);
       xml.closeTag(para);
-
-
-      final String parent = parent(cat.getHref());
-      
-      if (parent != null) {
-        xml.openTag(para);
-        xml.openTag(address, "href", catHref(parent) + "?format=html");
-        xml.value("parent");
-        xml.closeTag(address);
-        xml.closeTag(para);
-      }
-
-      xml.property(para, cat.getDescription());
-
-      if (!Util.isEmpty(cat.getChildren())) {
-        xml.openTag(ul);
-
-        for (final Category.CategoryChild ch: cat.getChildren()) {
-          xml.openTag(li);
-          xml.openTag(address, "href", 
-                      catHref(ch.getHref()) + "?format=html");
-          xml.value(ch.getHref());
-          xml.closeTag(address);
-          xml.closeTag(li);
-        }
-        
-        xml.closeTag(ul);
-      }
-
-      xml.closeTag(div);
-    } catch (Throwable t) {
-      throw new ServletException(t);
     }
+
+    xml.property(para, cat.getDescription());
+
+    if (!Util.isEmpty(cat.getChildren())) {
+      xml.openTag(ul);
+
+      for (final Category.CategoryChild ch: cat.getChildren()) {
+        xml.openTag(li);
+        xml.openTag(address, "href",
+                    catHref(ch.getHref()) + "?format=html");
+        xml.value(ch.getHref());
+        xml.closeTag(address);
+        xml.closeTag(li);
+      }
+        
+      xml.closeTag(ul);
+    }
+
+    xml.closeTag(div);
   }
 
   protected Category getRemote(final String href) 
@@ -400,23 +403,27 @@ public abstract class CategoryMethodBase extends MethodBase {
     }
 
     try {
-      final BasicHttpClient cl = getClient();
-
-      final List<Header> headers = new ArrayList<>();
-      headers.add(new BasicHeader("Accept", "application/json"));
+      final CloseableHttpClient cl = getClient();
 
       for (final String server: servers) {
-        final String urlStr =
-                endingSlash(server) +
-                        "category/" + 
-                        href;
+        final URIBuilder urib =
+                CatUtil.fromServerUrl(
+                        server,
+                        Collections.singletonList(href),
+                        null);
 
-        final int status = cl.sendRequest("GET", urlStr, headers);
-        if ((status / 100) != 2) {
-          continue; // Try elsewhere
+        try (final CloseableHttpResponse hresp =
+                     HttpUtil.doGet(cl,
+                                    urib.build(),
+                                    this::getDefaultHeaders,
+                                    null)) {   // content type
+          final int status = HttpUtil.getStatus(hresp);
+          if ((status / 100) != 2) {
+            continue; // Try elsewhere
+          }
+
+          return readJsonCat(hresp.getEntity().getContent());
         }
-
-        return readJsonCat(cl.getResponseBodyAsStream());
       }
 
       // Nowhere left to go
@@ -441,33 +448,37 @@ public abstract class CategoryMethodBase extends MethodBase {
     }
 
     try {
-      final BasicHttpClient cl = getClient();
-
-      final List<Header> headers = new ArrayList<>();
-      headers.add(new BasicHeader("Accept", "application/json"));
-      
-      String urlSuffix = "categories/" +
-              "?from=" + from +
-              "&ct=" + size +
-              "&href=" + href +
-              "&q=" + URLEncoder.encode(q, "UTF-8");
-      
-      if (pfx != null) {
-        urlSuffix += "&pfx=" + URLEncoder.encode(pfx, "UTF-8");
-      }
+      final CloseableHttpClient cl = getClient();
 
       for (final String server: servers) {
-        final String urlStr = 
-                endingSlash(server) + urlSuffix;
+        final URIBuilder urib =
+                CatUtil.fromServerUrl(
+                        server,
+                        null,
+                        pfx,
+                        new BasicNameValuePair("href",
+                                               String.valueOf(href)),
+                        new BasicNameValuePair("from",
+                                               String.valueOf(from)),
+                        new BasicNameValuePair("ct",
+                                               String.valueOf(size)),
+                        new BasicNameValuePair("q", q));
 
-        final int status = cl.sendRequest("GET", urlStr, headers);
-        if ((status / 100) != 2) {
-          continue; // Try elsewhere
+        try (final CloseableHttpResponse hresp =
+                     HttpUtil.doGet(cl,
+                                    urib.build(),
+                                    this::getDefaultHeaders,
+                                    null)) {   // content type
+          final int status = HttpUtil.getStatus(hresp);
+
+          if ((status / 100) != 2) {
+            continue; // Try elsewhere
+          }
+
+          return getMapper()
+                  .readValue(hresp.getEntity().getContent(),
+                             SearchResult.class);
         }
-
-        return getMapper()
-                .readValue(cl.getResponseBodyAsStream(),
-                           SearchResult.class);
       }
 
       // Nowhere left to go
@@ -476,24 +487,20 @@ public abstract class CategoryMethodBase extends MethodBase {
       throw new ServletException(t);
     }
   }
-  
-  private String endingSlash(final String val) {
-    if (val.endsWith("/")) {
-      return val;
-    }
-    
-    return val + "/";
+
+  private Headers getDefaultHeaders() {
+    return defaultHeaders;
   }
-  
+
   protected Category readJsonCat(final InputStream str) throws ServletException {
     try {
       return getMapper().readValue(str, Category.class);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new ServletException(t);
     }
   }
   
-  protected BasicHttpClient getClient() {
+  protected CloseableHttpClient getClient() {
     return client;    
   }
   

@@ -19,6 +19,7 @@
 package org.bedework.category.common;
 
 import org.bedework.util.misc.ToString;
+import org.bedework.util.misc.response.Response;
 
 import java.util.Set;
 import java.util.TreeSet;
@@ -35,22 +36,11 @@ public class SearchResult extends Response {
   }
 
   public SearchResult(final Status status) {
-    super(status);
-  }
-
-  public SearchResult(final Status status,
-                      final String message) {
-    super(status, message);
-    
-    found = 0;
+    setStatus(status);
   }
 
   public SearchResult(final long found) {
     this.found = found;
-  }
-
-  public SearchResult(final Set<SearchResultItem> items) {
-    this.items = items;
   }
 
   public long getFound() {

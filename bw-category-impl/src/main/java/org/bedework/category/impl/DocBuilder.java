@@ -21,9 +21,10 @@ package org.bedework.category.impl;
 import org.bedework.category.common.Category;
 import org.bedework.category.common.CategoryException;
 import org.bedework.util.elasticsearch.EsDocInfo;
+import org.bedework.util.logging.BwLogger;
+import org.bedework.util.logging.Logged;
 import org.bedework.util.misc.Util;
 
-import org.apache.log4j.Logger;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 
@@ -38,22 +39,17 @@ import static org.bedework.category.common.Category.docType;
  * @author Mike Douglass douglm - rpi.edu
  *
  */
-public class DocBuilder {
+public class DocBuilder implements Logged {
   static final String docTypeUpdateTracker = "updateTracker";
 
   static final String updateTrackerId = "updateTracker";
 
-  private transient Logger log;
-
-  private boolean debug;
-
-  private XContentBuilder builder;
+  private final XContentBuilder builder;
 
   /**
    *
    */
   DocBuilder() throws CategoryException {
-    debug = getLog().isDebugEnabled();
     builder = newBuilder();
   }
 
@@ -63,21 +59,21 @@ public class DocBuilder {
 
   private XContentBuilder newBuilder() throws CategoryException {
     try {
-      XContentBuilder builder = XContentFactory.jsonBuilder();
+      final XContentBuilder builder = XContentFactory.jsonBuilder();
 
-      if (debug) {
-        builder = builder.prettyPrint();
+      if (debug()) {
+        builder.prettyPrint();
       }
 
       return builder;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new CategoryException(t);
     }
   }
 
   static class UpdateInfo {
     private String dtstamp;
-    private Long count = 0l;
+    private Long count = 0L;
 
     /* Set this true if we write something to the index */
     private boolean update;
@@ -130,7 +126,7 @@ public class DocBuilder {
   private void startObject() throws CategoryException {
     try {
       builder.startObject();
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new CategoryException(t);
     }
   }
@@ -138,7 +134,7 @@ public class DocBuilder {
   private void endObject() throws CategoryException {
     try {
       builder.endObject();
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new CategoryException(t);
     }
   }
@@ -232,7 +228,7 @@ public class DocBuilder {
 
     try {
       builder.field(name, val);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new CategoryException(e);
     }
   }
@@ -245,7 +241,7 @@ public class DocBuilder {
 
     try {
       builder.field(name, String.valueOf(val));
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new CategoryException(e);
     }
   }
@@ -259,41 +255,28 @@ public class DocBuilder {
 
       builder.startArray(name);
 
-      for (String s: vals) {
+      for (final String s: vals) {
         builder.value(s);
       }
 
       builder.endArray();
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new CategoryException(e);
     }
   }
 
-  protected Logger getLog() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
+  /* ==============================================================
+   *                   Logged methods
+   * ============================================================== */
+
+  private final BwLogger logger = new BwLogger();
+
+  @Override
+  public BwLogger getLogger() {
+    if ((logger.getLoggedClass() == null) && (logger.getLoggedName() == null)) {
+      logger.setLoggedClass(getClass());
     }
 
-    return log;
-  }
-
-  protected void info(final String msg) {
-    getLog().info(msg);
-  }
-
-  protected void debug(final String msg) {
-    getLog().debug(msg);
-  }
-
-  protected void warn(final String msg) {
-    getLog().warn(msg);
-  }
-
-  protected void error(final String msg) {
-    getLog().error(msg);
-  }
-
-  protected void error(final Throwable t) {
-    getLog().error(this, t);
+    return logger;
   }
 }

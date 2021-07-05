@@ -20,6 +20,7 @@ package org.bedework.category.web;
 
 import org.bedework.category.common.Category;
 import org.bedework.category.common.SearchResult;
+import org.bedework.util.logging.BwLogger;
 import org.bedework.util.misc.Util;
 import org.bedework.util.servlet.ReqUtil;
 
@@ -139,7 +140,7 @@ public class GetMethod extends CategoryMethodBase {
   private void processCategories(final List<String> resourceUri,
                                  final HttpServletRequest req,
                                  final HttpServletResponse resp) throws ServletException {
-    ReqUtil rutil = new ReqUtil(req, resp);
+    final ReqUtil rutil = new ReqUtil(req, resp);
 
     try {
       final boolean primary = rutil.present("primary");
@@ -180,6 +181,21 @@ public class GetMethod extends CategoryMethodBase {
     } catch(final Throwable t) {
       throw new ServletException(t);
     }
+  }
+
+  /* ==============================================================
+   *                   Logged methods
+   * ============================================================== */
+
+  private final BwLogger logger = new BwLogger();
+
+  @Override
+  public BwLogger getLogger() {
+    if ((logger.getLoggedClass() == null) && (logger.getLoggedName() == null)) {
+      logger.setLoggedClass(getClass());
+    }
+
+    return logger;
   }
 }
 

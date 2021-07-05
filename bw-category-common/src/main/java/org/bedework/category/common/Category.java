@@ -20,6 +20,7 @@ package org.bedework.category.common;
 
 import org.bedework.util.misc.ToString;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -162,6 +163,14 @@ public class Category implements Comparable<Category> {
   
   public void setHrefElements(final List<HrefElement> val) {
     hrefElements = val;
+  }
+
+  public void addHrefElement(final HrefElement val) {
+    if (hrefElements == null) {
+      hrefElements = new ArrayList<>();
+    }
+
+    hrefElements.add(val);
   }
 
   /**

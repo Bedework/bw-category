@@ -21,7 +21,6 @@ package org.bedework.category.impl;
 import org.bedework.category.common.Category;
 import org.bedework.category.common.Category.CategoryChild;
 import org.bedework.util.elasticsearch.EntityBuilderBase;
-import org.bedework.util.indexing.IndexException;
 import org.bedework.util.misc.Util;
 
 import java.util.List;
@@ -40,12 +39,12 @@ public class EntityBuilder extends EntityBuilderBase {
    * @param version of document
    */
   EntityBuilder(final Map<String, ?> fields,
-                final long version) throws IndexException {
+                final long version) {
     super(fields, version);
   }
 
 
-  Category makeCategory() throws IndexException {
+  Category makeCategory() {
     final Category c = new Category();
 
     c.setHref(getString("href"));
@@ -53,7 +52,10 @@ public class EntityBuilder extends EntityBuilderBase {
     c.setNamespaceAbbrev(getString("namespaceAbbrev"));
     c.setLast(getString("last"));
     c.setLowerLast(getString("lowerLast"));
-    c.setHrefElements(getFieldValues("hrefElements"));
+
+    getFieldValues("hrefElements").forEach(
+            hrefEl -> c.addHrefElement((Category.HrefElement)hrefEl));
+
     c.setHrefDepth(getInt("hrefDepth"));
     c.setLastUpdate(getString("lastUpdate"));
     c.setDescription(getString("description"));
@@ -62,8 +64,7 @@ public class EntityBuilder extends EntityBuilderBase {
     return c;
   }
 
-  private Set<CategoryChild> makeCatChildren()
-          throws IndexException {
+  private Set<CategoryChild> makeCatChildren() {
     final List<Object> vals = getFieldValues("children");
 
     if (Util.isEmpty(vals)) {

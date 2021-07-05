@@ -22,8 +22,9 @@ import org.bedework.category.common.Category;
 import org.bedework.category.common.CategoryConfigProperties;
 import org.bedework.category.common.CategoryException;
 import org.bedework.util.jmx.InfoLines;
+import org.bedework.util.logging.BwLogger;
+import org.bedework.util.logging.Logged;
 
-import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -44,9 +45,9 @@ import javax.xml.parsers.SAXParserFactory;
 /**
  * User: mike
  */
-public abstract class DmozStructureParser extends DefaultHandler {
-  private Logger log;
-
+public abstract class DmozStructureParser
+        extends DefaultHandler
+        implements Logged {
   private final static String elTopic = "Topic";
   private final static String elCatid = "catid";
   private final static String elLastUpdate = "lastUpdate";
@@ -78,10 +79,11 @@ public abstract class DmozStructureParser extends DefaultHandler {
       structureDataPath = Paths.get(this.conf.getDataPath());
 
       if (this.conf.getExclusions() != null) {
-        Path p = Paths.get(this.conf.getExclusions());
+        final Path p = Paths.get(this.conf.getExclusions());
         final File f = p.toFile();
 
-        LineNumberReader lnr = new LineNumberReader(new FileReader(f));
+        final LineNumberReader lnr =
+                new LineNumberReader(new FileReader(f));
         
         exclusions = new TreeSet<>();
         
@@ -114,7 +116,7 @@ public abstract class DmozStructureParser extends DefaultHandler {
     }
   }
   
-  public abstract void saveCategory(final Category cat)
+  public abstract void saveCategory(Category cat)
           throws CategoryException;
 
   public void parse() throws CategoryException {
@@ -136,7 +138,7 @@ public abstract class DmozStructureParser extends DefaultHandler {
   public void startElement (final String uri,
                             final String localName,
                             final String qName,
-                            final Attributes attributes) throws SAXException {
+                            final Attributes attributes) {
     curChars = new StringBuilder();
 
     if (skippingTopic) {
@@ -192,11 +194,11 @@ public abstract class DmozStructureParser extends DefaultHandler {
           break;
         }
 
-        CategoryChildImpl cci = new CategoryChildImpl();
+        final CategoryChildImpl cci = new CategoryChildImpl();
         cci.setHref(child);
 
         final String prefix;
-        final int sort;
+
         switch (localName) {
           case elNarrow:
             cci.setSort(0);
@@ -262,9 +264,9 @@ public abstract class DmozStructureParser extends DefaultHandler {
   }
 
   @Override
-  public void characters(final char ch[],
+  public void characters(final char[] ch,
                          final int start,
-                         final int length) throws SAXException {
+                         final int length) {
     curChars.append(ch, start, length);
   }
 
@@ -301,7 +303,7 @@ public abstract class DmozStructureParser extends DefaultHandler {
 
   private int intVal() throws SAXException {
     try {
-      return Integer.valueOf(curChars.toString());
+      return Integer.parseInt(curChars.toString());
     } catch (final Throwable t) {
       throw new SAXException(t.getMessage());
     }
@@ -330,33 +332,18 @@ public abstract class DmozStructureParser extends DefaultHandler {
     return null;
   }
 
-  protected void info(final String msg) {
-    getLogger().info(msg);
-  }
+  /* ==============================================================
+   *                   Logged methods
+   * ============================================================== */
 
-  protected void warn(final String msg) {
-    getLogger().warn(msg);
-  }
+  private final BwLogger logger = new BwLogger();
 
-  protected void debug(final String msg) {
-    getLogger().debug(msg);
-  }
-
-  protected void error(final Throwable t) {
-    getLogger().error(this, t);
-  }
-
-  protected void error(final String msg) {
-    getLogger().error(msg);
-  }
-
-  /* Get a logger for messages
-   */
-  protected Logger getLogger() {
-    if (log == null) {
-      log = Logger.getLogger(this.getClass());
+  @Override
+  public BwLogger getLogger() {
+    if ((logger.getLoggedClass() == null) && (logger.getLoggedName() == null)) {
+      logger.setLoggedClass(getClass());
     }
 
-    return log;
+    return logger;
   }
 }

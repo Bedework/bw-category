@@ -3,28 +3,36 @@
 */
 package org.bedework.category.ical;
 
+import org.bedework.category.common.CatUtil;
 import org.bedework.util.args.Args;
-import org.bedework.util.http.BasicHttpClient;
+import org.bedework.util.http.HttpUtil;
+import org.bedework.util.logging.BwLogger;
+import org.bedework.util.logging.Logged;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.UnfoldingReader;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Property;
-import org.apache.log4j.Logger;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileReader;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Formatter;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * User: mike Date: 5/4/16 Time: 11:57
  */
-public class Categoriser {
-  static void usage(final String error_msg) {
+public class Categoriser implements Logged {
+  void usage(final String error_msg) {
     if (error_msg != null) {
       print(error_msg);
     }
@@ -47,13 +55,14 @@ public class Categoriser {
     System.exit(0);
   }
 
-  static String catsUrl = "http://localhost:8080/bwcat/";
-  static String prefix;
-  static String ics;
+  String catsUrl = "http://localhost:8080/bwcat/";
+  String prefix;
+  String ics;
 
-  static BasicHttpClient cl;
+  final CloseableHttpClient cl =
+          HttpClients.createDefault();
 
-  static boolean processArgs(final Args args) throws Throwable {
+  boolean processArgs(final Args args) throws Throwable {
     if (args == null) {
       return true;
     }
@@ -85,40 +94,40 @@ public class Categoriser {
   }
 
   public static void main(final String[] args) {
+    final Categoriser cat = new Categoriser();
+
     try {
-      if (!processArgs(new Args(args))) {
+      if (!cat.processArgs(new Args(args))) {
         return;
       }
-      cl = new BasicHttpClient(30);
-      cl.setBaseURI(new URI(catsUrl));
-      
-      CalendarBuilder builder = new CalendarBuilder();
+
+      final CalendarBuilder builder = new CalendarBuilder();
 
       final UnfoldingReader ufrdr =
-              new UnfoldingReader(new FileReader(ics),
+              new UnfoldingReader(new FileReader(cat.ics),
                                   true);
 
-      Calendar calendar = builder.build(ufrdr);
+      final Calendar calendar = builder.build(ufrdr);
 
       for (final Object o : calendar.getComponents()) {
-        Component component = (Component)o;
+        final Component component = (Component)o;
 
         if (component.getName().equals(Component.VTIMEZONE)) {
           continue;
         }
-        
+
         String dtstart = null;
         String summary = null;
         String categories = "     ";
         String val = "";
-        
+
         for (final Object o1 : component.getProperties()) {
-          Property property = (Property)o1;
-          
+          final Property property = (Property)o1;
+
           final String nm = property.getName();
 
           switch (nm) {
-            case Property.DTSTART: 
+            case Property.DTSTART:
               dtstart = property.getValue();
               continue;
 
@@ -131,7 +140,7 @@ public class Categoriser {
               val += " " + property.getValue();
               categories += property.getValue() + " ";
               continue;
-              
+
             case Property.COMMENT:
             case Property.DESCRIPTION:
               val += " " + property.getValue();
@@ -139,20 +148,11 @@ public class Categoriser {
 
           }
 
-          final StringBuilder sb = 
-                  new StringBuilder("categories/?href&q=");
-          sb.append(URLEncoder.encode(val, "UTF-8"));
-
-          if (prefix != null) {
-            sb.append("&pfx=");
-            sb.append(URLEncoder.encode(prefix, "UTF-8"));
-          }
-          
           System.out.println("Dtstart: " + dtstart +
-                  " summary: " + summary);
+                                     " summary: " + summary);
           System.out.println(categories);
-          
-          System.out.println(getString(sb.toString()));
+
+          System.out.println(cat.getString(val));
         }
       }
     } catch (final Throwable t) {
@@ -160,51 +160,84 @@ public class Categoriser {
     }
   }
 
-  public static String getString(final String request) throws Throwable {
+  public String getString(final String query) {
     try {
-      final InputStream is = cl.get(request, 
-                                    null,  // contentType 
-                                    null);
+      final URIBuilder urib =
+              CatUtil.fromServerUrl(catsUrl,
+                                    null,
+                                    prefix,
+                                    new BasicNameValuePair("href", null),
+                                    new BasicNameValuePair("q", query));
 
-      if (is == null) {
-        return null;
-      }
+      try (final CloseableHttpResponse hresp =
+                   HttpUtil.doGet(cl,
+                                  urib.build(),
+                                  null, // headers
+                                  null)) {   // content type
+        final int rc = HttpUtil.getStatus(hresp);
 
-      final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-      final int bufSize = 2048;
-      final byte[] buf = new byte[bufSize];
-      while (true) {
-        final int len = is.read(buf, 0, bufSize);
-        if (len == -1) {
-          break;
+        if (rc == HttpServletResponse.SC_NOT_MODIFIED) {
+          // Data unchanged.
+          if (debug()) {
+            debug("data unchanged");
+          }
+          return null;
         }
 
-        baos.write(buf, 0, len);
-      }
+        if (rc != HttpServletResponse.SC_OK) {
+          if (debug()) {
+            debug("Unsuccessful response from server was " + rc);
+          }
 
-      return baos.toString("UTF-8");
-    } finally {
-      try {
-        cl.release();
-      } catch (final Throwable ignored) {}
+          return null;
+        }
+
+        final InputStream is = hresp.getEntity().getContent();
+
+        if (is == null) {
+          return null;
+        }
+
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        final int bufSize = 2048;
+        final byte[] buf = new byte[bufSize];
+        while (true) {
+          final int len = is.read(buf, 0, bufSize);
+          if (len == -1) {
+            break;
+          }
+
+          baos.write(buf, 0, len);
+        }
+
+        return baos.toString(StandardCharsets.UTF_8);
+      }
+    } catch (final Throwable t) {
+      error(t);
+      return null;
     }
   }
 
-
-  static void print(final String fmt,
-                    final Object... params) {
+  void print(final String fmt,
+             final Object... params) {
     final Formatter f = new Formatter();
 
     info(f.format(fmt, params).toString());
   }
 
-  static void info(final String msg) {
-    Logger.getLogger(Categoriser.class).info(msg);
-  }
+  /* ==============================================================
+   *                   Logged methods
+   * ============================================================== */
 
-  @SuppressWarnings("unused")
-  static void warn(final String msg) {
-    Logger.getLogger(Categoriser.class).warn(msg);
+  private final BwLogger logger = new BwLogger();
+
+  @Override
+  public BwLogger getLogger() {
+    if ((logger.getLoggedClass() == null) && (logger.getLoggedName() == null)) {
+      logger.setLoggedClass(getClass());
+    }
+
+    return logger;
   }
 }

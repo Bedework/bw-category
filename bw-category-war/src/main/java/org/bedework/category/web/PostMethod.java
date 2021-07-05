@@ -18,6 +18,7 @@
 */
 package org.bedework.category.web;
 
+import org.bedework.util.logging.BwLogger;
 import org.bedework.util.misc.Util;
 
 import java.util.List;
@@ -30,10 +31,9 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class PostMethod extends CategoryMethodBase {
   @Override
-  public void init() throws ServletException {
+  public void init() {
   }
 
-  @SuppressWarnings({"unchecked"})
   @Override
   public void doMethod(final HttpServletRequest req,
                        final HttpServletResponse resp) throws ServletException {
@@ -48,8 +48,8 @@ public class PostMethod extends CategoryMethodBase {
 
       final String action = resourceUri.get(0);
       
-      if (debug) {
-        debugMsg("Illegal action " + action);
+      if (debug()) {
+        debug("Illegal action " + action);
       }
 
       resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -58,6 +58,21 @@ public class PostMethod extends CategoryMethodBase {
     } catch(final Throwable t) {
       throw new ServletException(t);
     }
+  }
+
+  /* ==============================================================
+   *                   Logged methods
+   * ============================================================== */
+
+  private final BwLogger logger = new BwLogger();
+
+  @Override
+  public BwLogger getLogger() {
+    if ((logger.getLoggedClass() == null) && (logger.getLoggedName() == null)) {
+      logger.setLoggedClass(getClass());
+    }
+
+    return logger;
   }
 }
 

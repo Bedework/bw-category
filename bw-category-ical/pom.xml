@@ -12,6 +12,12 @@
   <artifactId>bw-category-ical</artifactId>
 
   <dependencies>
+    <dependency>
+      <groupId>org.bedework</groupId>
+      <artifactId>bw-category-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <!-- Bedework: Util -->
     <dependency>
       <groupId>org.bedework</groupId>
@@ -37,27 +43,15 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore</artifactId>
     </dependency>
+
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <exclusions>
-        <exclusion>
-          <artifactId>jmxtools</artifactId>
-          <groupId>com.sun.jdmk</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>jmxri</artifactId>
-          <groupId>com.sun.jmx</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>jms</artifactId>
-          <groupId>javax.jms</groupId>
-        </exclusion>
-      </exclusions>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
     </dependency>
   </dependencies>
 </project>

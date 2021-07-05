@@ -24,6 +24,7 @@ import org.bedework.util.elasticsearch.EsCtlMBean;
 import org.bedework.util.elasticsearch.EsUtil;
 import org.bedework.util.jmx.ConfBase;
 import org.bedework.util.jmx.InfoLines;
+import org.bedework.util.misc.AbstractProcessorThread;
 import org.bedework.util.misc.Util;
 
 import java.util.List;
@@ -44,7 +45,7 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
   /**
    * The thread that runs the feed
    */
-  private class Processor extends ProcessorThread {
+  private class Processor extends AbstractProcessorThread {
     /**
      * @param name - for the thread
      */
@@ -53,23 +54,7 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
     }
 
     @Override
-    public void error(final String msg) {
-      Categories.this.error(msg);
-    }
-
-    @Override
-    public void error(final Throwable t) {
-      Categories.this.error(t);
-    }
-
-    @Override
-    public void info(final String msg) {
-      Categories.this.info(msg);
-    }
-
-    @Override
-    public void warn(final String msg) {
-      Categories.this.warn(msg);
+    public void runInit() {
     }
 
     @Override
@@ -77,7 +62,11 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
     }
 
     @Override
-    public void run() {
+    public void close() {
+    }
+
+    @Override
+    public void runProcess() {
       infoLines = new InfoLines();
 
       try {
@@ -297,7 +286,7 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
 
   @Override
   public void index() {
-    final String st = ProcessorThread.checkStarted(indexer);
+    final String st = AbstractProcessorThread.checkStarted(indexer);
     if (statusRunning.equals(st)) {
       error("Already started");
       return;
@@ -332,7 +321,7 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
       return;
     }
 
-    ProcessorThread.stop(indexer);
+    AbstractProcessorThread.stopProcess(indexer);
     indexer = null;
   }
 
@@ -340,7 +329,7 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
   public String listIndexes() {
     try {
       return getEsCtl().listIndexes();
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       t.printStackTrace();
       return t.getLocalizedMessage();
     }
@@ -366,7 +355,7 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
       }
 
       return res.toString();
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       t.printStackTrace();
       return t.getLocalizedMessage();
     }
@@ -432,7 +421,7 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
   /**
    * 
    * @return Mbean to configure our local copy of EsUtil
-   * @throws Throwable
+   * @throws Throwable on fatal error
    */
   private EsCtlMBean getEsCtl() throws Throwable {
     return EsUtil.getEsCtl();
