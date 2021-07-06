@@ -9,34 +9,31 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>bw-category-service</artifactId>
+  <artifactId>bw-category-web</artifactId>
 
   <dependencies>
+    <!-- Internal Project Dependencies -->
     <dependency>
-      <groupId>org.bedework.bw-cat</groupId>
+      <groupId>org.bedework</groupId>
       <artifactId>bw-category-common</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.bedework.bw-cat</groupId>
+      <groupId>org.bedework</groupId>
       <artifactId>bw-category-impl</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.bedework</groupId>
-      <artifactId>bw-util-config</artifactId>
+      <artifactId>bw-category-service</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.bedework</groupId>
-      <artifactId>bw-util-elasticsearch</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.bedework</groupId>
-      <artifactId>bw-util-jmx</artifactId>
+      <artifactId>bw-util-http</artifactId>
     </dependency>
 
     <dependency>
@@ -45,8 +42,28 @@
     </dependency>
 
     <dependency>
-      <groupId>org.elasticsearch</groupId>
-      <artifactId>elasticsearch</artifactId>
+      <groupId>org.bedework</groupId>
+      <artifactId>bw-util-servlet</artifactId>
+    </dependency>
+
+    <!-- Third Party Libraries -->
+
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Test Dependencies -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>
