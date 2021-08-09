@@ -37,7 +37,7 @@
     <commons-codec.version>1.5</commons-codec.version>
     -->
     <commons-lang.version>2.3</commons-lang.version>
-    <elasticsearch.version>7.13.0</elasticsearch.version>
+    <elasticsearch.version>7.13.3</elasticsearch.version>
     <jackson.version>2.11.0</jackson.version>
     <junit.version>4.13.1</junit.version>
     <servlet-api.version>4.0.0</servlet-api.version>
