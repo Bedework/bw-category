@@ -12,7 +12,7 @@
     <orderEntry type="module" module-name="bw-category-common" />
     <orderEntry type="library" name="Maven: org.bedework:bw-util-config:4.1.4" level="project" />
     <orderEntry type="library" name="Maven: org.bedework:bw-util-xml:4.0.31" level="project" />
-    <orderEntry type="module" module-name="bw-util-indexing" />
+    <orderEntry type="library" name="Maven: org.bedework:bw-util-indexing:4.1.4" level="project" />
     <orderEntry type="library" name="Maven: org.bedework:bw-util-jmx:4.1.4" level="project" />
     <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.3" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.11.0" level="project" />
