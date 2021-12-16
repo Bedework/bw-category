@@ -22,7 +22,7 @@
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.11.0" level="project" />
     <orderEntry type="module" module-name="bw-category-impl" />
     <orderEntry type="library" name="Maven: org.bedework:bw-util-config:4.1.4" level="project" />
-    <orderEntry type="library" name="Maven: org.bedework:bw-util-logging:5.0.0" level="project" />
+    <orderEntry type="module" module-name="bw-util-logging" />
     <orderEntry type="library" name="Maven: org.bedework:bw-util-xml:4.0.31" level="project" />
     <orderEntry type="library" name="Maven: org.bedework:bw-util-elasticsearch:4.1.4" level="project" />
     <orderEntry type="library" name="Maven: org.bedework:bw-util-tz:4.1.4" level="project" />
