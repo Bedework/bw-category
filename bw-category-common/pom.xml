@@ -5,10 +5,10 @@
 		<groupId>org.bedework.bw-cat</groupId>
 		<artifactId>bw-category</artifactId>
 		<version>4.0.0-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
 	</parent>
+
 	<artifactId>bw-category-common</artifactId>
-	<name>bw-category-common</name>
+  <name>Bedework category service: common classes</name>
 
 	<dependencies>
 		<!-- Bedework: Util -->
