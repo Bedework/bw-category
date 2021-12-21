@@ -14,6 +14,12 @@
   <packaging>pom</packaging>
   <name>Bedework category service</name>
 
+  <scm>
+    <connection>scm:git:git@github.com:Bedework/bw-category.git</connection>
+    <developerConnection>scm:git:git@github.com:Bedework/bw-category.git</developerConnection>
+    <url>https://github.com/Bedework/bw-category</url>
+  </scm>
+
   <modules>
     <module>bw-category-common</module>
     <module>bw-category-war</module>
