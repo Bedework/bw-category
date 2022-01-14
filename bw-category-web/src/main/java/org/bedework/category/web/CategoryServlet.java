@@ -20,8 +20,8 @@ package org.bedework.category.web;
 
 import org.bedework.category.service.Categories;
 import org.bedework.category.service.CategoryConfigPropertiesImpl;
-import org.bedework.util.elasticsearch.EsCtl;
-import org.bedework.util.elasticsearch.EsCtlMBean;
+import org.bedework.util.opensearch.EsCtl;
+import org.bedework.util.opensearch.EsCtlMBean;
 import org.bedework.util.jmx.ConfBase;
 import org.bedework.util.jmx.MBeanUtil;
 import org.bedework.util.logging.BwLogger;

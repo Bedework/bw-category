@@ -16,19 +16,19 @@
   <dependencies>
     <!-- Internal Project Dependencies -->
     <dependency>
-      <groupId>org.bedework</groupId>
+      <groupId>org.bedework.bw-cat</groupId>
       <artifactId>bw-category-common</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.bedework</groupId>
+      <groupId>org.bedework.bw-cat</groupId>
       <artifactId>bw-category-impl</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>org.bedework</groupId>
+      <groupId>org.bedework.bw-cat</groupId>
       <artifactId>bw-category-service</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -41,6 +41,11 @@
     <dependency>
       <groupId>org.bedework</groupId>
       <artifactId>bw-util-misc</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.bedework</groupId>
+      <artifactId>bw-util-opensearch</artifactId>
     </dependency>
 
     <dependency>

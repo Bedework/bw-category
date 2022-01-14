@@ -33,7 +33,7 @@
 
     <dependency>
       <groupId>org.bedework</groupId>
-      <artifactId>bw-util-elasticsearch</artifactId>
+      <artifactId>bw-util-opensearch</artifactId>
     </dependency>
 
     <dependency>
@@ -47,8 +47,8 @@
     </dependency>
 
     <dependency>
-      <groupId>org.elasticsearch</groupId>
-      <artifactId>elasticsearch</artifactId>
+      <groupId>org.opensearch</groupId>
+      <artifactId>opensearch</artifactId>
     </dependency>
   </dependencies>
 </project>
