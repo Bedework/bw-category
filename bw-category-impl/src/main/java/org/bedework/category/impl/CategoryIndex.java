@@ -23,13 +23,13 @@ import org.bedework.category.common.CategoryConfigProperties;
 import org.bedework.category.common.CategoryException;
 import org.bedework.category.common.SearchResult;
 import org.bedework.category.common.SearchResultItem;
-import org.bedework.util.opensearch.EsDocInfo;
-import org.bedework.util.opensearch.EsUtil;
-import org.bedework.util.opensearch.IndexProperties;
 import org.bedework.util.jmx.InfoLines;
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 import org.bedework.util.misc.response.Response;
+import org.bedework.util.opensearch.EsDocInfo;
+import org.bedework.util.opensearch.IndexingProperties;
+import org.bedework.util.opensearch.SearchClient;
 
 import org.opensearch.action.bulk.BulkProcessor;
 import org.opensearch.action.bulk.BulkRequest;
@@ -68,13 +68,12 @@ import static org.bedework.util.misc.response.Response.Status.failed;
  * User: mike Date: 3/13/16 Time: 16:11
  */
 public class CategoryIndex implements Logged {
-  private final IndexProperties idxprops;
+  private final SearchClient sch;
   private final CategoryConfigProperties conf;
   
-  public CategoryIndex(final IndexProperties idxprops,
-                       final CategoryConfigProperties conf)
-          throws CategoryException {
-    this.idxprops = idxprops;
+  public CategoryIndex(final IndexingProperties idxprops,
+                       final CategoryConfigProperties conf) {
+    sch = new SearchClient(idxprops);
     this.conf = conf;
   }
 
@@ -85,8 +84,8 @@ public class CategoryIndex implements Logged {
    */
   public String newIndex() throws CategoryException {
     try {
-      return getEsUtil().newIndex(conf.getIndexName(),
-                                  conf.getIndexMapping());
+      return sch.newIndex(conf.getIndexName(),
+                          conf.getIndexMapping());
     } catch (final Throwable t) {
       throw new CategoryException(t);
     }
@@ -94,7 +93,7 @@ public class CategoryIndex implements Logged {
   
   public List<String> purgeIndexes() throws CategoryException {
     try {
-      return getEsUtil().purgeIndexes(
+      return sch.purgeIndexes(
               Collections.singleton(conf.getIndexName()));
     } catch (final Throwable t) {
       throw new CategoryException(t);
@@ -148,7 +147,7 @@ public class CategoryIndex implements Logged {
         targetIndex = indexName;
       }
       
-      getEsUtil().indexDoc(di, targetIndex);
+      sch.indexDoc(di, targetIndex);
     } catch (final Throwable t) {
       throw new CategoryException(t);
     }
@@ -161,9 +160,9 @@ public class CategoryIndex implements Logged {
 
     final GetResponse gr;
     try {
-      gr = getEsUtil().get(conf.getIndexName(),
-                           Category.docType,
-                           href);
+      gr = sch.get(conf.getIndexName(),
+                   Category.docType,
+                   href);
 
       if (gr == null) {
         return null;
@@ -239,8 +238,6 @@ public class CategoryIndex implements Logged {
         return Response.notOk(new SearchResult(),
                               failed, "Must supply query");
       }
-
-      final RestHighLevelClient cl = getEsUtil().getClient();
 
       String qstring;
       final int qtype;
@@ -348,7 +345,7 @@ public class CategoryIndex implements Logged {
   
   public void makeProduction(final String indexName) throws CategoryException {
     try {
-      getEsUtil().swapIndex(indexName, conf.getIndexName());
+      sch.swapIndex(indexName, conf.getIndexName());
     } catch (final Throwable t) {
       throw new CategoryException(t);
     }
@@ -514,17 +511,9 @@ public class CategoryIndex implements Logged {
     return new DocBuilder().makeDoc(cat);
   }
 
-  private EsUtil getEsUtil() throws CategoryException {
-    try {
-      return new EsUtil(idxprops);
-    } catch (final Throwable t) {
-      throw new CategoryException(t);
-    }
-  }
-
   private RestHighLevelClient getClient() throws CategoryException {
     try {
-      return getEsUtil().getClient();
+      return sch.getSearchClient();
     } catch (final Throwable t) {
       throw new CategoryException(t);
     }

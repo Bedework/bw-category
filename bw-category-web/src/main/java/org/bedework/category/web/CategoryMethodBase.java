@@ -27,7 +27,7 @@ import org.bedework.category.common.SearchResultItem;
 import org.bedework.category.impl.CategoryChildImpl;
 import org.bedework.category.impl.CategoryIndex;
 import org.bedework.category.impl.HrefElementImpl;
-import org.bedework.util.opensearch.IndexProperties;
+import org.bedework.util.opensearch.IndexingProperties;
 import org.bedework.util.http.Headers;
 import org.bedework.util.http.HttpUtil;
 import org.bedework.util.misc.Util;
@@ -59,7 +59,7 @@ import javax.xml.namespace.QName;
 public abstract class CategoryMethodBase extends MethodBase {
   protected CategoryConfigProperties config;
   
-  protected IndexProperties idxProps;
+  protected IndexingProperties idxProps;
   protected CategoryIndex index;
   
   private ObjectMapper objectMapper;
@@ -166,7 +166,7 @@ public abstract class CategoryMethodBase extends MethodBase {
    * @param dumpContent true to wrap and dump content for debugging
    * @throws ServletException on error
    */
-  public void init(final IndexProperties idxProps,
+  public void init(final IndexingProperties idxProps,
                    final CategoryConfigProperties config,
                    final boolean dumpContent) throws ServletException {
     this.idxProps = idxProps;

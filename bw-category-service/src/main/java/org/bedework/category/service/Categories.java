@@ -21,7 +21,7 @@ package org.bedework.category.service;
 import org.bedework.category.common.CategoryException;
 import org.bedework.category.impl.CategoryIndex;
 import org.bedework.util.opensearch.EsCtlMBean;
-import org.bedework.util.opensearch.EsUtil;
+import org.bedework.util.opensearch.OschUtil;
 import org.bedework.util.jmx.ConfBase;
 import org.bedework.util.jmx.InfoLines;
 import org.bedework.util.misc.AbstractProcessorThread;
@@ -424,6 +424,6 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
    * @throws Throwable on fatal error
    */
   private EsCtlMBean getEsCtl() throws Throwable {
-    return EsUtil.getEsCtl();
+    return OschUtil.getEsCtl();
   }
 }
