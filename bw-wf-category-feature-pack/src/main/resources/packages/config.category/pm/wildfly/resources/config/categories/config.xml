@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<index-properties xmlns="http://bedework.org/ns/" type="org.bedework.category.service.CategoryConfigPropertiesImpl">
+  <indexName>categories</indexName>
+  <dataPath>/Users/mike/data/dmoz/structure.rdf.u8</dataPath>
+  <indexMapping>${org.bedework.config.dir}/category/mappings.json</indexMapping>
+</index-properties>

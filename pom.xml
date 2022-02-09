@@ -28,5 +28,6 @@
     <module>bw-category-impl</module>
     <module>bw-category-ical</module>
     <module>bw-category-web</module>
+    <module>bw-wf-category-feature-pack</module>
   </modules>
 </project>
