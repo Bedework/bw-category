@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.bedework.bw-cat</groupId>
 		<artifactId>bw-category</artifactId>
-		<version>4.0.0</version>
+		<version>4.0.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>bw-category-common</artifactId>
