@@ -15,9 +15,9 @@
     <orderEntry type="module" module-name="bw-util-indexing" />
     <orderEntry type="module" module-name="bw-util-jmx" />
     <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.13.0" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.13.0" level="project" />
-    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.13.0" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.13.2" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.13.2" level="project" />
+    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.13.2.2" level="project" />
     <orderEntry type="module" module-name="bw-util-args" />
     <orderEntry type="module" module-name="bw-util-http" />
     <orderEntry type="module" module-name="bw-util-logging" />
