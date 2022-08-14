@@ -105,7 +105,9 @@ public class CategoryServlet extends ServletBase {
     EsCtl esCtl;
 
     Configurator() {
-      super("org.bedework.categories:service=Categories");
+      super("org.bedework.categories:service=Categories",
+            (String)null,
+            null);
     }
 
     @Override

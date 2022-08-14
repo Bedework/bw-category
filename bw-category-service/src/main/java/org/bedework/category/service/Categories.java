@@ -35,8 +35,8 @@ import java.util.List;
  */
 public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
         implements CategoriesMBean {
-  /* Name of the property holding the location of the config data */
-  private static final String datauriPname = "org.bedework.categories.confuri";
+  /* Name of the directory holding the config data */
+  private static final String confDirName = "categories";
 
   private final static String nm = "config";
 
@@ -130,10 +130,7 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
   /**
    */
   public Categories() {
-    super(getServiceName(nm));
-
-    setConfigName(nm);
-    setConfigPname(datauriPname);
+    super(getServiceName(nm), confDirName, nm);
   }
 
   /**
