@@ -28,7 +28,7 @@ import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 import org.bedework.util.misc.response.Response;
 import org.bedework.util.opensearch.EsDocInfo;
-import org.bedework.util.opensearch.IndexingProperties;
+import org.bedework.util.indexing.IndexingProperties;
 import org.bedework.util.opensearch.SearchClient;
 
 import org.opensearch.action.bulk.BulkProcessor;

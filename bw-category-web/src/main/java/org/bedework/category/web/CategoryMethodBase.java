@@ -27,7 +27,7 @@ import org.bedework.category.common.SearchResultItem;
 import org.bedework.category.impl.CategoryChildImpl;
 import org.bedework.category.impl.CategoryIndex;
 import org.bedework.category.impl.HrefElementImpl;
-import org.bedework.util.opensearch.IndexingProperties;
+import org.bedework.util.indexing.IndexingProperties;
 import org.bedework.util.http.Headers;
 import org.bedework.util.http.HttpUtil;
 import org.bedework.util.misc.Util;
