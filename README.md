@@ -53,3 +53,6 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 * Update library versions
 * Simplify the configuration utilities.
 * Move Indexing mbean out of opensearch package to remove unnecessary dependencies.
+
+### 4.0.2
+* Omitted to remove bw-xml as a dependency
