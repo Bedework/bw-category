@@ -73,7 +73,7 @@ public abstract class DmozStructureParser
   
   private Set<String> exclusions;
 
-  public DmozStructureParser(final CategoryConfigProperties conf) throws CategoryException {
+  public DmozStructureParser(final CategoryConfigProperties conf) {
     try {
       this.conf = conf;
       structureDataPath = Paths.get(this.conf.getDataPath());
@@ -116,10 +116,9 @@ public abstract class DmozStructureParser
     }
   }
   
-  public abstract void saveCategory(Category cat)
-          throws CategoryException;
+  public abstract void saveCategory(Category cat);
 
-  public void parse() throws CategoryException {
+  public void parse() {
     try {
       final File f = structureDataPath.toFile();
 

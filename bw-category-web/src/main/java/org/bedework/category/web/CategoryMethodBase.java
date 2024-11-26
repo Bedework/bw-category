@@ -207,7 +207,7 @@ public abstract class CategoryMethodBase extends MethodBase {
   private final SimpleDateFormat httpDateFormatter =
       new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss ");
 
-  protected CategoryIndex getIndex() throws CategoryException {
+  protected CategoryIndex getIndex() {
     if (index != null) {
       return index;
     }

@@ -49,7 +49,7 @@ public class DocBuilder implements Logged {
   /**
    *
    */
-  DocBuilder() throws CategoryException {
+  DocBuilder() {
     builder = newBuilder();
   }
 
@@ -57,7 +57,7 @@ public class DocBuilder implements Logged {
    *                   package private methods
    * =================================================================== */
 
-  private XContentBuilder newBuilder() throws CategoryException {
+  private XContentBuilder newBuilder() {
     try {
       final XContentBuilder builder = XContentFactory.jsonBuilder();
 
@@ -123,7 +123,7 @@ public class DocBuilder implements Logged {
     }
   }
 
-  private void startObject() throws CategoryException {
+  private void startObject() {
     try {
       builder.startObject();
     } catch (final Throwable t) {
@@ -131,7 +131,7 @@ public class DocBuilder implements Logged {
     }
   }
 
-  private void endObject() throws CategoryException {
+  private void endObject() {
     try {
       builder.endObject();
     } catch (final Throwable t) {
@@ -140,7 +140,7 @@ public class DocBuilder implements Logged {
   }
 
   /* Return the docinfo for the indexer */
-  EsDocInfo makeDoc(final UpdateInfo ent) throws CategoryException {
+  EsDocInfo makeDoc(final UpdateInfo ent) {
     try {
       startObject();
 
@@ -159,7 +159,7 @@ public class DocBuilder implements Logged {
   }
 
   /* Return the docinfo for the indexer */
-  EsDocInfo makeDoc(final Category ent) throws CategoryException {
+  EsDocInfo makeDoc(final Category ent) {
     try {
       startObject();
 
@@ -189,7 +189,7 @@ public class DocBuilder implements Logged {
    *                   private methods
    * ======================================================================== */
 
-  private void makeCatChildren(final Set<CategoryChild> vals) throws CategoryException {
+  private void makeCatChildren(final Set<CategoryChild> vals) {
     try {
       if (Util.isEmpty(vals)) {
         return;
@@ -207,7 +207,7 @@ public class DocBuilder implements Logged {
     }
   }
 
-  private void makeCategoryChild(final CategoryChild val) throws CategoryException {
+  private void makeCategoryChild(final CategoryChild val) {
     try {
       builder.startObject();
 
@@ -221,7 +221,7 @@ public class DocBuilder implements Logged {
   }
 
   private void makeField(final String name,
-                         final String val) throws CategoryException {
+                         final String val) {
     if (val == null) {
       return;
     }
@@ -234,7 +234,7 @@ public class DocBuilder implements Logged {
   }
 
   private void makeField(final String name,
-                         final Object val) throws CategoryException {
+                         final Object val) {
     if (val == null) {
       return;
     }
@@ -247,7 +247,7 @@ public class DocBuilder implements Logged {
   }
 
   private void makeField(final String name,
-                         final Set<String> vals) throws CategoryException {
+                         final Set<String> vals) {
     try {
       if (Util.isEmpty(vals)) {
         return;

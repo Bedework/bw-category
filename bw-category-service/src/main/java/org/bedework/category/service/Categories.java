@@ -101,7 +101,7 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
       }
     }
 
-    private boolean buildIndex() throws CategoryException {
+    private boolean buildIndex() {
       final CategoryIndex indexer;
       final Categories cats = Categories.this;
       

@@ -82,7 +82,7 @@ public class CategoryIndex implements Logged {
    * @return new index name
    * @throws CategoryException on fatal error
    */
-  public String newIndex() throws CategoryException {
+  public String newIndex() {
     try {
       return sch.newIndex(conf.getIndexName(),
                           conf.getIndexMapping());
@@ -91,7 +91,7 @@ public class CategoryIndex implements Logged {
     }
   }
   
-  public List<String> purgeIndexes() throws CategoryException {
+  public List<String> purgeIndexes() {
     try {
       return sch.purgeIndexes(
               Collections.singleton(conf.getIndexName()));
@@ -107,14 +107,14 @@ public class CategoryIndex implements Logged {
    * @throws CategoryException on fatal error
    */
   public void parseDmoz(final InfoLines infoLines,
-                        final String indexName) throws CategoryException {
+                        final String indexName) {
     final long startTime = System.currentTimeMillis();
 
     final DmozStructureParser parser =
             new DmozStructureParser(conf) {
               @Override
               public void saveCategory(final Category cat)
-                      throws CategoryException {
+                      {
                 CategoryIndex.this.saveCategory(cat,
                                                 indexName);
               }
@@ -136,7 +136,7 @@ public class CategoryIndex implements Logged {
    */
   public void saveCategory(final Category cat,
                            final String indexName)
-          throws CategoryException {
+          {
     final EsDocInfo di = makeDoc(cat);
     
     try {
@@ -153,7 +153,7 @@ public class CategoryIndex implements Logged {
     }
   }
   
-  public Category getCategory(final String href) throws CategoryException {
+  public Category getCategory(final String href) {
     if (debug()) {
       debug("getCategory: target=" + conf.getIndexName() + " href=" + href);
     }
@@ -343,7 +343,7 @@ public class CategoryIndex implements Logged {
     }
   }
   
-  public void makeProduction(final String indexName) throws CategoryException {
+  public void makeProduction(final String indexName) {
     try {
       sch.swapIndex(indexName, conf.getIndexName());
     } catch (final Throwable t) {
@@ -372,7 +372,7 @@ public class CategoryIndex implements Logged {
     }
   }
 
-  public void reIndex(final String toIndex) throws CategoryException {
+  public void reIndex(final String toIndex) {
     long processed = 0;
     final QueryBuilder qb = QueryBuilders.matchAllQuery();
 
@@ -466,7 +466,7 @@ public class CategoryIndex implements Logged {
     }
   }
   
-  private Category makeCat(final SearchHit hit) throws CategoryException {
+  private Category makeCat(final SearchHit hit) {
     try {
       return new EntityBuilder(hit.getSourceAsMap(),
                                0).makeCategory();
@@ -476,7 +476,7 @@ public class CategoryIndex implements Logged {
   }
 
   private EsDocInfo makeDoc(final Category cat)
-          throws CategoryException {
+          {
     /* Set up fields derived from href */
     final String hr = cat.getHref();
     cat.setNamespaceAbbrev(hr.substring(0, hr.indexOf('/', 1)));
@@ -511,7 +511,7 @@ public class CategoryIndex implements Logged {
     return new DocBuilder().makeDoc(cat);
   }
 
-  private RestHighLevelClient getClient() throws CategoryException {
+  private RestHighLevelClient getClient() {
     try {
       return sch.getSearchClient();
     } catch (final Throwable t) {
