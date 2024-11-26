@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.bedework.bw-cat</groupId>
 		<artifactId>bw-category</artifactId>
-		<version>4.0.3</version>
+		<version>4.0.4-SNAPSHOT</version>
 	</parent>
 	<artifactId>bw-category-ear</artifactId>
 	<packaging>ear</packaging>
