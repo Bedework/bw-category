@@ -11,4 +11,23 @@
 	<artifactId>bw-category-war</artifactId>
 	<packaging>war</packaging>
 	<name>Bedework category service: war</name>
+
+	<properties>
+		<org.bedework.war.dependency>org.bedework.category.web</org.bedework.war.dependency>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.bedework</groupId>
+				<artifactId>bw-util-maven-deploy</artifactId>
+
+				<configuration>
+					<warName>bw-category</warName>
+					<baseDirPath>${project.basedir}/../..</baseDirPath>
+					<propsPath>${project.basedir}/src/main/resources/wildfly.deploy.properties</propsPath>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

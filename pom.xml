@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.bedework</groupId>
     <artifactId>bedework-parent</artifactId>
-    <version>78</version>
+    <version>85</version>
   </parent>
 
   <groupId>org.bedework.bw-cat</groupId>
@@ -23,7 +23,6 @@
   <modules>
     <module>bw-category-common</module>
     <module>bw-category-war</module>
-    <module>bw-category-ear</module>
     <module>bw-category-service</module>
     <module>bw-category-impl</module>
     <module>bw-category-ical</module>
