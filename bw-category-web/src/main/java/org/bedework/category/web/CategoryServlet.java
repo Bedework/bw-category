@@ -20,11 +20,11 @@ package org.bedework.category.web;
 
 import org.bedework.category.service.Categories;
 import org.bedework.category.service.CategoryConfigPropertiesImpl;
-import org.bedework.util.opensearch.EsCtl;
-import org.bedework.util.opensearch.EsCtlMBean;
 import org.bedework.util.jmx.ConfBase;
 import org.bedework.util.jmx.MBeanUtil;
 import org.bedework.util.logging.BwLogger;
+import org.bedework.util.opensearch.IndexCtl;
+import org.bedework.util.opensearch.IndexCtlMBean;
 import org.bedework.util.servlet.MethodBase;
 import org.bedework.util.servlet.ServletBase;
 
@@ -39,7 +39,7 @@ import static org.bedework.util.servlet.MethodBase.MethodInfo;
  * @version 1.0
  */
 public class CategoryServlet extends ServletBase {
-  private static EsCtlMBean esCtl;
+  private static IndexCtlMBean indexCtl;
   
   @Override
   protected void addMethods() {
@@ -72,7 +72,7 @@ public class CategoryServlet extends ServletBase {
     final CategoryMethodBase cmb = (CategoryMethodBase)mb;
 
     try {
-      cmb.init(getEsCtl(), cfg.categories.getConfig(),
+      cmb.init(getIndexCtl(), cfg.categories.getConfig(),
                dumpContent);
     } catch (final Throwable t) {
       throw new ServletException(t);
@@ -84,15 +84,16 @@ public class CategoryServlet extends ServletBase {
    * @return Mbean to configure our local copy of EsUtil
    * @throws Throwable on fatal error
    */
-  private EsCtlMBean getEsCtl() throws Throwable {
-    if (esCtl != null) {
-      return esCtl;
+  private IndexCtlMBean getIndexCtl() throws Throwable {
+    if (indexCtl != null) {
+      return indexCtl;
     }
 
-    esCtl = (EsCtlMBean)MBeanUtil.getMBean(EsCtlMBean.class,
-                                           EsCtlMBean.serviceName);
+    indexCtl = (IndexCtlMBean)MBeanUtil
+            .getMBean(IndexCtlMBean.class,
+                      IndexCtlMBean.serviceName);
 
-    return esCtl;
+    return indexCtl;
   }
 
   /* -----------------------------------------------------------------------
@@ -102,7 +103,7 @@ public class CategoryServlet extends ServletBase {
   static class Configurator
           extends ConfBase<CategoryConfigPropertiesImpl<?>> {
     Categories categories;
-    EsCtl esCtl;
+    IndexCtl indexCtl;
 
     Configurator() {
       super("org.bedework.categories:service=Categories",
@@ -127,11 +128,11 @@ public class CategoryServlet extends ServletBase {
         categories.loadConfig();
 //        categories.start();
         
-        esCtl = new EsCtl();
-        register(new ObjectName(esCtl.getServiceName()),
-                 esCtl);
+        indexCtl = new IndexCtl();
+        register(new ObjectName(indexCtl.getServiceName()),
+                 indexCtl);
 
-        esCtl.loadConfig();
+        indexCtl.loadConfig();
       } catch (final Throwable t){
         t.printStackTrace();
       }

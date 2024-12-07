@@ -18,14 +18,13 @@
 */
 package org.bedework.category.service;
 
-import org.bedework.category.common.CategoryException;
 import org.bedework.category.impl.CategoryIndex;
-import org.bedework.util.opensearch.EsCtlMBean;
-import org.bedework.util.opensearch.OschUtil;
 import org.bedework.util.jmx.ConfBase;
 import org.bedework.util.jmx.InfoLines;
 import org.bedework.util.misc.AbstractProcessorThread;
 import org.bedework.util.misc.Util;
+import org.bedework.util.opensearch.IndexCtlMBean;
+import org.bedework.util.opensearch.OschUtil;
 
 import java.util.List;
 
@@ -106,7 +105,7 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
       final Categories cats = Categories.this;
       
       try {
-        indexer = new CategoryIndex(getEsCtl(), cats);
+        indexer = new CategoryIndex(getIndexCtl(), cats);
 
         final String targetIndex = indexer.newIndex();
         info("Indexing to " + targetIndex);
@@ -299,7 +298,7 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
     final Categories cats = Categories.this;
 
     try {
-      indexer = new CategoryIndex(getEsCtl(), cats);
+      indexer = new CategoryIndex(getIndexCtl(), cats);
 
       final String targetIndex = indexer.newIndex();
       info("New index " + targetIndex);
@@ -325,7 +324,7 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
   @Override
   public String listIndexes() {
     try {
-      return getEsCtl().listIndexes();
+      return getIndexCtl().listIndexes();
     } catch (final Throwable t) {
       t.printStackTrace();
       return t.getLocalizedMessage();
@@ -335,7 +334,7 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
   @Override
   public String purgeIndexes() {
     try {
-      final List<String> is = new CategoryIndex(getEsCtl(),
+      final List<String> is = new CategoryIndex(getIndexCtl(),
                                                 this).purgeIndexes();
 
       if (Util.isEmpty(is)) {
@@ -385,7 +384,7 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
     final Categories cats = Categories.this;
 
     try {
-      indexer = new CategoryIndex(getEsCtl(), cats);
+      indexer = new CategoryIndex(getIndexCtl(), cats);
 
       final String targetIndex = indexer.newIndex();
       info("Reindexing to " + targetIndex);
@@ -417,10 +416,10 @@ public class Categories extends ConfBase<CategoryConfigPropertiesImpl>
 
   /**
    * 
-   * @return Mbean to configure our local copy of EsUtil
+   * @return Mbean to configure our local copy of OschUtil
    * @throws Throwable on fatal error
    */
-  private EsCtlMBean getEsCtl() throws Throwable {
-    return OschUtil.getEsCtl();
+  private IndexCtlMBean getIndexCtl() throws Throwable {
+    return OschUtil.getIndexCtl();
   }
 }
