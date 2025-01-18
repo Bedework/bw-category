@@ -29,6 +29,7 @@ import org.bedework.util.servlet.MethodBase;
 import org.bedework.util.servlet.ServletBase;
 
 import javax.management.ObjectName;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
 import static org.bedework.util.servlet.MethodBase.MethodInfo;
@@ -67,7 +68,9 @@ public class CategoryServlet extends ServletBase {
   
   protected void initMethodBase(final MethodBase mb,
                                 final ConfBase conf,
-                                final boolean dumpContent) throws ServletException {
+                                final ServletContext context,
+                                final boolean dumpContent,
+                                final String methodName) throws ServletException {
     final Configurator cfg = (Configurator)conf;
     final CategoryMethodBase cmb = (CategoryMethodBase)mb;
 

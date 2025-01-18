@@ -19,7 +19,7 @@
 package org.bedework.category.impl;
 
 import org.bedework.category.common.Category;
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 
 /**
  * User: mike

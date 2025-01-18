@@ -21,15 +21,14 @@ package org.bedework.category.web;
 import org.bedework.category.common.CatUtil;
 import org.bedework.category.common.Category;
 import org.bedework.category.common.CategoryConfigProperties;
-import org.bedework.category.common.CategoryException;
 import org.bedework.category.common.SearchResult;
 import org.bedework.category.common.SearchResultItem;
 import org.bedework.category.impl.CategoryChildImpl;
 import org.bedework.category.impl.CategoryIndex;
 import org.bedework.category.impl.HrefElementImpl;
-import org.bedework.util.indexing.IndexingProperties;
 import org.bedework.util.http.Headers;
 import org.bedework.util.http.HttpUtil;
+import org.bedework.util.indexing.IndexingProperties;
 import org.bedework.util.misc.Util;
 import org.bedework.util.servlet.MethodBase;
 import org.bedework.util.xml.XmlEmit;
@@ -154,7 +153,6 @@ public abstract class CategoryMethodBase extends MethodBase {
     defaultHeaders.add("Accept", "application/json");
   }
 
-  @Override
   public void init() throws ServletException {
     
   }

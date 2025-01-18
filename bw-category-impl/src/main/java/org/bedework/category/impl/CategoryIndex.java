@@ -26,7 +26,7 @@ import org.bedework.category.common.SearchResultItem;
 import org.bedework.util.jmx.InfoLines;
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
-import org.bedework.util.misc.response.Response;
+import org.bedework.base.response.Response;
 import org.bedework.util.opensearch.EsDocInfo;
 import org.bedework.util.indexing.IndexingProperties;
 import org.bedework.util.opensearch.SearchClient;
@@ -62,7 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.bedework.util.misc.response.Response.Status.failed;
+import static org.bedework.base.response.Response.Status.failed;
 
 /**
  * User: mike Date: 3/13/16 Time: 16:11

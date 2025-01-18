@@ -112,7 +112,7 @@ public class GetMethod extends CategoryMethodBase {
       } else if (html) {
         writeHtml(cat, resp);
       } else {
-        writeJson(cat, resp);
+        writeJson(resp, cat);
       }
       
       if (fromRemote) {
@@ -175,7 +175,7 @@ public class GetMethod extends CategoryMethodBase {
         return;
       }
 
-      writeJson(sr, resp);
+      writeJson(resp, sr);
     } catch (final ServletException se) {
       throw se;
     } catch(final Throwable t) {

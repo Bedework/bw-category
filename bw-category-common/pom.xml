@@ -11,7 +11,12 @@
   <name>Bedework category service: common classes</name>
 
 	<dependencies>
-		<!-- Bedework: Util -->
+    <dependency>
+      <groupId>org.bedework</groupId>
+      <artifactId>bw-base</artifactId>
+    </dependency>
+
+    <!-- Bedework: Util -->
     <dependency>
       <groupId>org.bedework</groupId>
       <artifactId>bw-util-config</artifactId>

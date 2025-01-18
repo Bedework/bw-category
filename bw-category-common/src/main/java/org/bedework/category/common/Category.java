@@ -18,7 +18,7 @@
 */
 package org.bedework.category.common;
 
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 
 import java.util.ArrayList;
 import java.util.List;

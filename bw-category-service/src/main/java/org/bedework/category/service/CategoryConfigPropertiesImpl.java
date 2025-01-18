@@ -21,7 +21,7 @@ package org.bedework.category.service;
 import org.bedework.category.common.CategoryConfigProperties;
 import org.bedework.util.config.ConfInfo;
 import org.bedework.util.config.ConfigBase;
-import org.bedework.util.misc.ToString;
+import org.bedework.base.ToString;
 
 import java.util.Arrays;
 import java.util.Collections;
