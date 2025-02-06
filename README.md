@@ -52,7 +52,20 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 ### 4.0.1
 * Update library versions
 * Simplify the configuration utilities.
-* Move Indexing mbean out of opensearch package to remove unnecessary dependencies.
+* Move Indexing mbean out of opensearch 
+cpackage to remove unnecessary dependencies.
 
 ### 4.0.2
+* Update library versions
 * Omitted to remove bw-xml as a dependency
+
+### 4.0.3
+* Update library versions
+* Updates for opensearch 2.18.0
+* make CategoryException subclass of RuntimeException
+
+### 4.0.4
+* Update library versions
+* Repackage category server
+* Remove last traces of elastic search from class names. Make some more generic.
+* Move response classes and ToString into bw-base module.
