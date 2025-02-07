@@ -29,8 +29,8 @@ import org.bedework.util.servlet.MethodBase;
 import org.bedework.util.servlet.ServletBase;
 
 import javax.management.ObjectName;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
 
 import static org.bedework.util.servlet.MethodBase.MethodInfo;
 

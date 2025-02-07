@@ -26,7 +26,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Formatter;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * User: mike Date: 5/4/16 Time: 11:57
