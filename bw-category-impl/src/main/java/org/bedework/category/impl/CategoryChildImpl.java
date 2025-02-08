@@ -21,8 +21,8 @@ package org.bedework.category.impl;
 import org.bedework.category.common.Category;
 import org.bedework.base.ToString;
 
-import org.apache.commons.lang.builder.CompareToBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * User: mike
