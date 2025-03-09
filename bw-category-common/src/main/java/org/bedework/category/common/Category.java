@@ -47,16 +47,6 @@ public class Category implements Comparable<Category> {
   private String title;
   private String description;
 
-  public interface CategoryChild 
-          extends Comparable<CategoryChild> {
-    /**
-     * @return 0, 1 or 2 - dmoz puts 2 at top
-     */
-    int getSort();
-
-    String getHref();
-  }
-
   private Set<CategoryChild> children = new TreeSet<>();
 
   private int sort;

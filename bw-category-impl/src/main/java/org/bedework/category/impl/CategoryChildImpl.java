@@ -18,8 +18,8 @@
 */
 package org.bedework.category.impl;
 
-import org.bedework.category.common.Category;
 import org.bedework.base.ToString;
+import org.bedework.category.common.CategoryChild;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -27,8 +27,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 /**
  * User: mike
  */
-public class CategoryChildImpl implements Category.CategoryChild,
-        Comparable<Category.CategoryChild> {
+public class CategoryChildImpl implements CategoryChild,
+        Comparable<CategoryChild> {
   private int sort;
   private String href;
 
@@ -66,7 +66,7 @@ public class CategoryChildImpl implements Category.CategoryChild,
       return false;
     }
 
-    return compareTo((Category.CategoryChild)that) == 0;
+    return compareTo((CategoryChild)that) == 0;
   }
 
   @Override
@@ -78,7 +78,7 @@ public class CategoryChildImpl implements Category.CategoryChild,
   }
 
   @Override
-  public int compareTo(final Category.CategoryChild that) {
+  public int compareTo(final CategoryChild that) {
     if (this == that) {
       return 0;
     }

@@ -19,7 +19,7 @@
 package org.bedework.category.impl;
 
 import org.bedework.category.common.Category;
-import org.bedework.category.common.Category.CategoryChild;
+import org.bedework.category.common.CategoryChild;
 import org.bedework.util.opensearch.EntityBuilderBase;
 import org.bedework.util.misc.Util;
 

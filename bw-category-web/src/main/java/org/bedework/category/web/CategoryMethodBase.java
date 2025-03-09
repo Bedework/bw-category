@@ -20,6 +20,7 @@ package org.bedework.category.web;
 
 import org.bedework.category.common.CatUtil;
 import org.bedework.category.common.Category;
+import org.bedework.category.common.CategoryChild;
 import org.bedework.category.common.CategoryConfigProperties;
 import org.bedework.category.common.SearchResult;
 import org.bedework.category.common.SearchResultItem;
@@ -36,6 +37,8 @@ import org.bedework.util.xml.XmlEmit.NameSpace;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -49,8 +52,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletResponse;
 import javax.xml.namespace.QName;
 
 /** Base class for all webdav servlet methods.
@@ -192,7 +193,7 @@ public abstract class CategoryMethodBase extends MethodBase {
     
     final SimpleModule sm = new SimpleModule();
     
-    sm.addAbstractTypeMapping(Category.CategoryChild.class, 
+    sm.addAbstractTypeMapping(CategoryChild.class,
             CategoryChildImpl.class);
     sm.addAbstractTypeMapping(Category.HrefElement.class,
                               HrefElementImpl.class);
@@ -377,7 +378,7 @@ public abstract class CategoryMethodBase extends MethodBase {
     if (!Util.isEmpty(cat.getChildren())) {
       xml.openTag(ul);
 
-      for (final Category.CategoryChild ch: cat.getChildren()) {
+      for (final var ch: cat.getChildren()) {
         xml.openTag(li);
         xml.openTag(address, "href",
                     catHref(ch.getHref()) + "?format=html");

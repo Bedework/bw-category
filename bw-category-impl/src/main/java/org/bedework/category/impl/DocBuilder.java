@@ -19,19 +19,19 @@
 package org.bedework.category.impl;
 
 import org.bedework.category.common.Category;
+import org.bedework.category.common.CategoryChild;
 import org.bedework.category.common.CategoryException;
-import org.bedework.util.opensearch.EsDocInfo;
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
 import org.bedework.util.misc.Util;
+import org.bedework.util.opensearch.EsDocInfo;
 
-import org.opensearch.core.xcontent.XContentBuilder;
 import org.opensearch.common.xcontent.XContentFactory;
+import org.opensearch.core.xcontent.XContentBuilder;
 
 import java.io.IOException;
 import java.util.Set;
 
-import static org.bedework.category.common.Category.CategoryChild;
 import static org.bedework.category.common.Category.docType;
 
 /** Build documents for OpenSearch
