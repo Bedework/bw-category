@@ -23,12 +23,11 @@ import org.bedework.category.common.CategoryConfigProperties;
 import org.bedework.category.common.CategoryException;
 import org.bedework.category.common.SearchResult;
 import org.bedework.category.common.SearchResultItem;
+import org.bedework.util.indexing.IndexingProperties;
 import org.bedework.util.jmx.InfoLines;
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
-import org.bedework.base.response.Response;
 import org.bedework.util.opensearch.EsDocInfo;
-import org.bedework.util.indexing.IndexingProperties;
 import org.bedework.util.opensearch.SearchClient;
 
 import org.opensearch.action.bulk.BulkProcessor;
@@ -44,6 +43,7 @@ import org.opensearch.client.RestHighLevelClient;
 import org.opensearch.common.document.DocumentField;
 import org.opensearch.common.lucene.search.function.FieldValueFactorFunction;
 import org.opensearch.common.unit.TimeValue;
+import org.opensearch.core.rest.RestStatus;
 import org.opensearch.index.query.BoolQueryBuilder;
 import org.opensearch.index.query.MultiMatchQueryBuilder;
 import org.opensearch.index.query.PrefixQueryBuilder;
@@ -51,7 +51,6 @@ import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.opensearch.index.query.functionscore.ScoreFunctionBuilders;
-import org.opensearch.core.rest.RestStatus;
 import org.opensearch.search.SearchHit;
 import org.opensearch.search.SearchHits;
 import org.opensearch.search.builder.SearchSourceBuilder;
@@ -235,8 +234,7 @@ public class CategoryIndex implements Logged {
                            final int size) {
     try {
       if (val == null) {
-        return Response.notOk(new SearchResult(),
-                              failed, "Must supply query");
+        return new SearchResult().notOk(failed, "Must supply query");
       }
 
       String qstring;
@@ -280,7 +278,7 @@ public class CategoryIndex implements Logged {
       try {
         resp = getClient().search(sreq, RequestOptions.DEFAULT);
       } catch (final Throwable t) {
-        return Response.error(new SearchResult(), t);
+        return new SearchResult().error(t);
       }
 
 //    if (resp.status() != RestStatus.OK) {
@@ -339,7 +337,8 @@ public class CategoryIndex implements Logged {
         error(t);
       }
 
-      return Response.notOk(new SearchResult(), failed, t.getLocalizedMessage());
+      return new SearchResult().notOk(failed,
+                                      t.getLocalizedMessage());
     }
   }
   
@@ -490,7 +489,7 @@ public class CategoryIndex implements Logged {
      */
 
     for (final String s: els) {
-      if (s.length() == 0) {
+      if (s.isEmpty()) {
         continue;
       }
 

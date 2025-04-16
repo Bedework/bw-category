@@ -25,7 +25,8 @@ import org.bedework.base.response.Response;
  * User: mike Date: 3/9/16 Time: 23:54
  */
 
-public class SearchResultItem extends Response
+public class SearchResultItem
+        extends Response<SearchResultItem>
         implements Comparable<SearchResultItem> {
   private Category category;
   private String href;
@@ -78,12 +79,11 @@ public class SearchResultItem extends Response
     score = val;
   }
 
-  public void toStringSegment(final ToString ts) {
-    super.toStringSegment(ts);
-
-    ts.append("category", getCategory());
-    ts.append("href", getHref());
-    ts.append("score", getScore());
+  public ToString toStringSegment(final ToString ts) {
+    return super.toStringSegment(ts)
+                .append("category", getCategory())
+                .append("href", getHref())
+                .append("score", getScore());
   }
 
   @Override

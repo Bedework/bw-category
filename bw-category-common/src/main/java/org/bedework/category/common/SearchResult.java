@@ -28,7 +28,7 @@ import java.util.TreeSet;
  * User: mike Date: 3/9/16 Time: 23:54
  */
 
-public class SearchResult extends Response {
+public class SearchResult extends Response<SearchResult> {
   private Set<SearchResultItem> items;
   private long found;
 
@@ -59,10 +59,9 @@ public class SearchResult extends Response {
     getItems().add(val);
   }
 
-  public void toStringSegment(final ToString ts) {
-    super.toStringSegment(ts);
-
-    ts.append("found", getFound());
-    ts.append("items", getItems());
+  public ToString toStringSegment(final ToString ts) {
+    return super.toStringSegment(ts)
+                .append("found", getFound())
+                .append("items", getItems());
   }
 } 
