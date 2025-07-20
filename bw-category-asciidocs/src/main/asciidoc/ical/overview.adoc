@@ -1,0 +1,6 @@
+[[ical]]
+== ical
+Provides icalendar related classes for the category server.
+
+At the moment, this consists of a categoriser.
+

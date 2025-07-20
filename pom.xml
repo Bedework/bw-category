@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.bedework</groupId>
     <artifactId>bedework-parent</artifactId>
-    <version>200-SNAPSHOT</version>
+    <version>222</version>
   </parent>
 
   <groupId>org.bedework.bw-cat</groupId>
@@ -27,5 +27,6 @@
     <module>bw-category-impl</module>
     <module>bw-category-ical</module>
     <module>bw-category-web</module>
+    <module>bw-category-asciidocs</module>
   </modules>
 </project>

@@ -1,0 +1,46 @@
+= Bedework Category Server modules.
+:title: The Bedework Category Server modules.
+:safe-mode-unsafe:
+:docinfo: shared
+:docinfodir: ./docinfo
+:docinfo2:
+:scriptsdir: ./tocbot-3.0.2
+:imagesdir: ./resources/
+:toc: left
+:toclevels: 4
+:sectnumlevels: 4
+//
+:reports-dir: reports/
+:common-dir: common
+:ical-dir: ical
+:impl-dir: impl
+:service-dir: service
+:war-dir: war
+:web-dir: web
+//
+:sectnums!:
+
+include::introduction.adoc[]
+
+:sectnums:
+
+include::{common-dir}/overview.adoc[]
+include::{common-dir}/using.adoc[]
+
+include::{ical-dir}/overview.adoc[]
+include::{ical-dir}/using.adoc[]
+
+include::{impl-dir}/overview.adoc[]
+include::{impl-dir}/using.adoc[]
+
+include::{service-dir}/overview.adoc[]
+include::{service-dir}/using.adoc[]
+
+include::{war-dir}/overview.adoc[]
+
+include::{web-dir}/overview.adoc[]
+include::{web-dir}/using.adoc[]
+
+[[reports]]
+== Reports
+link:reports/dependency-check-report.html[Dependency check]

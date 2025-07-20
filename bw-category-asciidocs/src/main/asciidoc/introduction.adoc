@@ -1,0 +1,13 @@
+[[introduction]]
+== Introduction
+The category service allows retrieval of categories by href or
+searching based on strings and filters.
+
+### Retrieve a category
+
+http://localhost:8080/bwcat/category/dmoz/Sports/
+
+### Search for a category with a string
+
+
+This documentation is mostly a place-holder.

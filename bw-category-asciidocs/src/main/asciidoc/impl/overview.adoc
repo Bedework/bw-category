@@ -1,0 +1,3 @@
+[[impl]]
+== impl
+Provides implementations of interfaces for the category server.

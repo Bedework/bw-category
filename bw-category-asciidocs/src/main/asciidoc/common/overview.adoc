@@ -1,0 +1,4 @@
+[[common]]
+== common
+Provides common code for the category server.
+

@@ -1,0 +1,4 @@
+[[war]]
+== war
+Provides the deployable war file for the category server. Will be deployed as part of a (re)build or at install time by a galleon layer.
+

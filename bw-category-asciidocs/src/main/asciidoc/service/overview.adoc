@@ -1,0 +1,3 @@
+[[service]]
+== service
+Provides a jmx based config service for th ecategory server.

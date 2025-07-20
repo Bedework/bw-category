@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.23">
+<title>The Bedework Category Server modules.</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="./asciidoctor.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>Bedework Category Server modules.</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#introduction">Introduction</a>
+<ul class="sectlevel2">
+<li><a href="#_retrieve_a_category">Retrieve a category</a></li>
+<li><a href="#_search_for_a_category_with_a_string">Search for a category with a string</a></li>
+</ul>
+</li>
+<li><a href="#common">1. common</a>
+<ul class="sectlevel2">
+<li><a href="#_using_this_project">1.1. Using this project</a></li>
+</ul>
+</li>
+<li><a href="#ical">2. ical</a>
+<ul class="sectlevel2">
+<li><a href="#_using_this_project_2">2.1. Using this project</a></li>
+</ul>
+</li>
+<li><a href="#impl">3. impl</a></li>
+<li><a href="#service">4. service</a></li>
+<li><a href="#war">5. war</a></li>
+<li><a href="#web">6. web</a>
+<ul class="sectlevel2">
+<li><a href="#_using_this_project_3">6.1. Using this project</a></li>
+</ul>
+</li>
+<li><a href="#reports">7. Reports</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="introduction">Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The category service allows retrieval of categories by href or
+searching based on strings and filters.</p>
+</div>
+<div class="sect2">
+<h3 id="_retrieve_a_category">Retrieve a category</h3>
+<div class="paragraph">
+<p><a href="http://localhost:8080/bwcat/category/dmoz/Sports/" class="bare">http://localhost:8080/bwcat/category/dmoz/Sports/</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_search_for_a_category_with_a_string">Search for a category with a string</h3>
+<div class="paragraph">
+<p>This documentation is mostly a place-holder.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="common">1. common</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Provides common code for the category server.</p>
+</div>
+<div class="sect2">
+<h3 id="_using_this_project">1.1. Using this project</h3>
+<div class="paragraph">
+<p>Add the artifact(s) as a dependency to your project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>      &lt;dependency&gt;
+        &lt;groupId&gt;org.bedework.bw-cat&lt;/groupId&gt;
+        &lt;artifactId&gt;bw-category-common&lt;/artifactId&gt;
+      &lt;/dependency&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ical">2. ical</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Provides icalendar related classes for the category server.</p>
+</div>
+<div class="paragraph">
+<p>At the moment, this consists of a categoriser.</p>
+</div>
+<div class="sect2">
+<h3 id="_using_this_project_2">2.1. Using this project</h3>
+<div class="paragraph">
+<p>Add the artifact(s) as a dependency to your project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>      &lt;dependency&gt;
+        &lt;groupId&gt;org.bedework.bw-cat&lt;/groupId&gt;
+        &lt;artifactId&gt;bw-category-ical&lt;/artifactId&gt;
+      &lt;/dependency&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="impl">3. impl</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Provides implementations of interfaces for the category server.
+=== Using this project
+Add the artifact(s) as a dependency to your project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>      &lt;dependency&gt;
+        &lt;groupId&gt;org.bedework.bw-cat&lt;/groupId&gt;
+        &lt;artifactId&gt;bw-category-impl&lt;/artifactId&gt;
+      &lt;/dependency&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="service">4. service</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Provides a jmx based config service for th ecategory server.
+=== Using this project
+Add the artifact(s) as a dependency to your project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>      &lt;dependency&gt;
+        &lt;groupId&gt;org.bedework.bw-cat&lt;/groupId&gt;
+        &lt;artifactId&gt;bw-category-service&lt;/artifactId&gt;
+      &lt;/dependency&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="war">5. war</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Provides the deployable war file for the category server. Will be deployed as part of a (re)build or at install time by a galleon layer.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="web">6. web</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Provides classes for th eweb interface for the category server.</p>
+</div>
+<div class="sect2">
+<h3 id="_using_this_project_3">6.1. Using this project</h3>
+<div class="paragraph">
+<p>Add the artifact(s) as a dependency to your project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>      &lt;dependency&gt;
+        &lt;groupId&gt;org.bedework.bw-cat&lt;/groupId&gt;
+        &lt;artifactId&gt;bw-category-web&lt;/artifactId&gt;
+      &lt;/dependency&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="reports">7. Reports</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="reports/dependency-check-report.html">Dependency check</a></p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2025-07-19 22:49:44 -0400
+</div>
+</div>
+</body>
+</html>
